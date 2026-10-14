@@ -155,7 +155,7 @@
   /* Custom "drag" cursor */
   function cloop(){
     cx+=(tx-cx)*.22;cy+=(ty-cy)*.22;
-    cur.style.transform='translate3d('+cx.toFixed(1)+'px,'+cy.toFixed(1)+'px,0)';
+    if(cur)cur.style.transform='translate3d('+cx.toFixed(1)+'px,'+cy.toFixed(1)+'px,0)';
     craf=(over||Math.hypot(tx-cx,ty-cy)>.5)?requestAnimationFrame(cloop):0;
   }
   car.addEventListener('pointerenter',function(e){

@@ -51,10 +51,8 @@ img{display:block;max-width:100%}
 .sub .tm{display:inline-block;vertical-align:top;font-size:.34em;line-height:1.2;margin-left:.15em}
 
 /* Carousel ---------------------------------------------------------------- */
-.car{position:relative;flex:1;min-height:240px;margin:0 calc(-1*var(--gx));perspective:1300px;cursor:grab;touch-action:pan-y;user-select:none;-webkit-user-select:none;overflow:hidden;outline-offset:-3px}
-.car.drag{cursor:grabbing}
+.car{position:relative;flex:1;min-height:240px;margin:0 calc(-1*var(--gx));perspective:1300px;cursor:default;touch-action:pan-y;user-select:none;-webkit-user-select:none;overflow:hidden;outline-offset:-3px}
 .car .it{position:absolute;left:0;top:0;background:var(--grey) center/cover no-repeat;will-change:transform;backface-visibility:hidden;-webkit-user-drag:none}
-@media (hover:hover) and (pointer:fine){.car{cursor:none}}
 @media (hover:none){.cur{display:none}}
 .cur{position:absolute;left:0;top:0;z-index:6000;pointer-events:none;opacity:0;transition:opacity .25s;will-change:transform}
 .cur span{display:flex;align-items:center;gap:.8rem;background:#000;color:#fff;padding:.65rem 1.05rem;border-radius:999px;font-size:.72rem;white-space:nowrap;transform:translate(-50%,-50%);transition:gap .4s var(--ease),padding .4s var(--ease)}
