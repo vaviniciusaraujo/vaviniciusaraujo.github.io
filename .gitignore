@@ -1,0 +1,20 @@
+# Renders originais (pesados, ficam só no computador)
+/works/
+/art/
+/lab/
+
+# Dados locais do editor
+/editor/backups/
+/editor/lixeira/
+/editor/tools/plan.json
+__pycache__/
+*.pyc
+*.tmp
+*.upload.*
+
+# Específico deste computador
+/.claude/
+*.lnk
+Thumbs.db
+desktop.ini
+.DS_Store
