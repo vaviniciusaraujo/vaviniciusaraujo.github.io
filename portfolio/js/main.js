@@ -513,6 +513,15 @@
   addEventListener('resize',update);update();
 })();
 
+/* Art / Lab: stacked sheets — each sheet a little wider than the one above */
+(function(){
+  'use strict';
+  [].forEach.call(document.querySelectorAll('.cards[data-cat="art"], .cards[data-cat="lab"]'),function(list){
+    list.classList.add('is-stack');
+    [].forEach.call(list.querySelectorAll('.card'),function(c,i){c.style.setProperty('--k',i)});
+  });
+})();
+
 /* Works: typographic index with hover thumbnails ------------------------------- */
 (function(){
   'use strict';
