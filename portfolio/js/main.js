@@ -597,3 +597,30 @@
     });
   },3600);
 })();
+
+/* 3D card on hover (home grid + project galleries): tilts with the mouse, floats,
+   content moves in depth, light glare follows the cursor */
+(function(){
+  'use strict';
+  if(window.__EDIT__||!matchMedia('(hover:hover)').matches||matchMedia('(prefers-reduced-motion:reduce)').matches)return;
+  var figs=[].slice.call(document.querySelectorAll('.feat-grid .ph, .mosaic>.ph'));
+  figs.forEach(function(f){
+    var g=document.createElement('i');g.className='glare';g.setAttribute('aria-hidden','true');f.appendChild(g);
+    f.addEventListener('pointerenter',function(){f.classList.remove('was-hover');f.classList.add('is-hover')});
+    f.addEventListener('pointermove',function(e){
+      var r=f.getBoundingClientRect();if(!r.width||!r.height)return;
+      var x=(e.clientX-r.left)/r.width-.5,y=(e.clientY-r.top)/r.height-.5;
+      f.style.setProperty('--rx',(-y*14).toFixed(2)+'deg');       // inclina para cima/baixo
+      f.style.setProperty('--ry',(x*18).toFixed(2)+'deg');        // gira para os lados
+      f.style.setProperty('--mx',(-x*r.width*.05).toFixed(1)+'px');   // conteúdo em profundidade
+      f.style.setProperty('--my',(-y*r.height*.05).toFixed(1)+'px');
+      f.style.setProperty('--lx',((x+.5)*100).toFixed(1)+'%');      // reflexo segue o mouse
+      f.style.setProperty('--ly',((y+.5)*100).toFixed(1)+'%');
+    });
+    f.addEventListener('pointerleave',function(){
+      f.classList.remove('is-hover');f.classList.add('was-hover');
+      ['--mx','--my'].forEach(function(k){f.style.setProperty(k,'0px')});
+      ['--rx','--ry'].forEach(function(k){f.style.setProperty(k,'0deg')});
+    });
+  });
+})();

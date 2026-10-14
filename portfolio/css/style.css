@@ -184,7 +184,7 @@ img{display:block;max-width:100%}
 .js-anim .mosaic>.ph[data-rv="left"]{clip-path:inset(0 100% 0 0)}
 .js-anim .mosaic>.ph[data-rv="right"]{clip-path:inset(0 0 0 100%)}
 .js-anim .mosaic>.ph.in{clip-path:inset(0);transition:clip-path 1.25s var(--reveal) var(--d,0s)}
-.js-anim .mosaic>.ph :is(img,video){scale:1.35;translate:0 var(--py,0px)}
+.js-anim .mosaic>.ph :is(img,video){scale:1.35;translate:var(--mx,0px) calc(var(--py,0px) + var(--my,0px))}
 .js-anim .mosaic>.ph.in :is(img,video){scale:1.1;transition:scale 1.9s var(--soft) var(--d,0s)}
 .js-anim .mosaic>.ph::before,.js-anim .mosaic>.ph::after{opacity:0;transform:translateY(6px)}
 .js-anim .mosaic>.ph.in::before,.js-anim .mosaic>.ph.in::after{opacity:1;transform:none;transition:opacity .6s ease calc(var(--d,0s) + .85s),transform .6s var(--soft) calc(var(--d,0s) + .85s)}
@@ -197,8 +197,24 @@ img{display:block;max-width:100%}
 .js-anim .feat-grid .ph[data-rv="left"]{clip-path:inset(0 100% 0 0)}
 .js-anim .feat-grid .ph[data-rv="right"]{clip-path:inset(0 0 0 100%)}
 .js-anim .feat-grid .ph.in{clip-path:inset(0);transition:clip-path 1.25s var(--reveal) var(--d,0s),transform .6s var(--ease),opacity .4s,filter .4s}
-.js-anim .feat-grid .ph :is(img,video){scale:1.3;translate:0 var(--py,0px)}
+.js-anim .feat-grid .ph :is(img,video){scale:1.3;translate:var(--mx,0px) calc(var(--py,0px) + var(--my,0px))}
 .js-anim .feat-grid .ph.in :is(img,video){scale:1.1;transition:scale 1.9s var(--soft) var(--d,0s)}
+/* hover: cartão 3D (home e galerias dos projetos) — gira com o mouse, flutua, conteúdo em profundidade e reflexo */
+@keyframes vaFloat{0%,100%{translate:0 0}50%{translate:0 -9px}}
+.ph .glare{display:none}
+@media (hover:hover){
+  .feat-grid .ph:hover,.mosaic .ph:hover{transform:none}
+  .js-anim :is(.feat-grid .ph,.mosaic>.ph).in:is(.is-hover,.was-hover){clip-path:none}
+  .js-anim :is(.feat-grid .ph,.mosaic>.ph).in.is-hover{z-index:3;transform:perspective(1100px) rotateX(var(--rx,0deg)) rotateY(var(--ry,0deg)) translateZ(40px);
+    box-shadow:0 30px 60px -18px rgba(0,0,0,.45);animation:vaFloat 3.4s ease-in-out infinite;
+    transition:clip-path 1.25s var(--reveal),transform .45s cubic-bezier(.22,1,.36,1),box-shadow .6s ease,opacity .4s,filter .4s}
+  .js-anim :is(.feat-grid .ph,.mosaic>.ph).in.was-hover{transition:clip-path 1.25s var(--reveal),transform 1.1s var(--soft),box-shadow .8s ease,opacity .4s,filter .4s}
+  .js-anim :is(.feat-grid .ph,.mosaic>.ph).in.is-hover :is(img,video){scale:1.16;transition:scale .9s var(--soft),translate .5s cubic-bezier(.22,1,.36,1)}
+  .js-anim :is(.feat-grid .ph,.mosaic>.ph).in.was-hover :is(img,video){transition:scale 1.1s var(--soft),translate 1.1s var(--soft)}
+  .js-anim :is(.feat-grid .ph,.mosaic>.ph) .glare{display:block;position:absolute;inset:0;z-index:1;pointer-events:none;opacity:0;transition:opacity .5s ease;
+    background:radial-gradient(circle at var(--lx,50%) var(--ly,30%),rgba(255,255,255,.38),rgba(255,255,255,0) 55%);mix-blend-mode:soft-light}
+  .js-anim :is(.feat-grid .ph,.mosaic>.ph).in.is-hover .glare{opacity:1}
+}
 .js-anim .feat-grid .lab h3{overflow:hidden}
 .js-anim .feat-grid .lab h3>a{display:inline-block}
 .js-anim .feat-grid .lab h3>*{transform:translateY(115%)}
