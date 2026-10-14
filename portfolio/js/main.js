@@ -252,7 +252,9 @@
     if(!t)return;
     var doc=new DOMParser().parseFromString(t,'text/html');
     var cards=[].slice.call(doc.querySelectorAll('.cards .card')).map(function(c){
-      var h=c.querySelector('h2,h3');return{href:c.getAttribute('href'),title:h?h.textContent.trim():''};
+      var h=c.querySelector('h2,h3'),v=c.querySelector('.cv video'),so=c.querySelector('.cv source'),im=c.querySelector('.cv img');
+      return{href:c.getAttribute('href'),title:h?h.textContent.trim():'',
+        video:v?v.getAttribute('src'):'',poster:v?v.getAttribute('poster'):'',img:so?so.getAttribute('srcset'):im?im.getAttribute('src'):''};
     });
     var i=cards.map(function(c){return c.href}).indexOf(location.pathname);
     if(i<0||cards.length<2)return;
@@ -261,7 +263,19 @@
       var a=document.createElement('a');a.className=cls;a.href=c.href;
       var s=document.createElement('span');s.textContent=label;
       var b=document.createElement('strong');b.textContent=c.title;
-      a.appendChild(s);a.appendChild(b);return a;
+      a.appendChild(s);a.appendChild(b);
+      // miniatura flutuante do projeto no hover (como no índice de Works)
+      if(c.video||c.img||c.poster){
+        var th=document.createElement('span');th.className='pn-thumb';th.setAttribute('aria-hidden','true');
+        var m;
+        if(c.video){m=document.createElement('video');m.muted=true;m.loop=true;m.playsInline=true;m.preload='none';if(c.poster)m.poster=c.poster;m.src=c.video}
+        else{m=document.createElement('img');m.alt='';m.decoding='async';m.loading='lazy';m.src=c.img||c.poster}
+        th.appendChild(m);a.appendChild(th);
+        a.addEventListener('mouseenter',function(){if(m.tagName==='VIDEO'){var p=m.play();if(p&&p.catch)p.catch(function(){})}});
+        a.addEventListener('mouseleave',function(){if(m.tagName==='VIDEO')m.pause()});
+        a.addEventListener('mousemove',function(e){var r=a.getBoundingClientRect();a.style.setProperty('--mx',(((e.clientX-r.left)/r.width-.5)*40).toFixed(1)+'px')});
+      }
+      return a;
     }
     nav.appendChild(link(prev,'prev','← Previous'));
     nav.appendChild(link(next,'next','Next →'));
