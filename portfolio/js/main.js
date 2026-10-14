@@ -217,7 +217,11 @@
 /* Videos: play only while visible ------------------------------------------- */
 (function(){
   'use strict';
-  var vids=[].slice.call(document.querySelectorAll('video[data-autoplay]'));
+  // no índice de Works (desktop), os vídeos das capas só tocam no hover — ver o bloco do índice
+  var hoverIndex=matchMedia('(hover:hover) and (min-width:761px)').matches;
+  var vids=[].slice.call(document.querySelectorAll('video[data-autoplay]')).filter(function(v){
+    return !(hoverIndex&&v.closest('.cards[data-cat="works"]'));
+  });
   if(!vids.length)return;
   var reduce=matchMedia('(prefers-reduced-motion:reduce)').matches;
   vids.forEach(function(v){v.muted=true;v.loop=true;v.playsInline=true;if(reduce)v.controls=true});
@@ -493,4 +497,67 @@
   }
   addEventListener('scroll',function(){if(!tick){tick=true;requestAnimationFrame(update)}},{passive:true});
   addEventListener('resize',update);update();
+})();
+
+/* Works: typographic index with hover thumbnails ------------------------------- */
+(function(){
+  'use strict';
+  var list=document.querySelector('.cards[data-cat="works"]');
+  if(!list)return;
+  list.classList.add('is-index');
+  // segunda miniatura: uma imagem do próprio projeto, sorteada a cada hover (lista do carrossel)
+  var pool={};
+  if(window.fetch)fetch('/assets/carousel.json').then(function(r){return r.ok?r.json():[]}).then(function(a){
+    (a||[]).forEach(function(u){var s=u.split('/').pop().split('--')[0];(pool[s]=pool[s]||[]).push(u)});
+  }).catch(function(){});
+  [].forEach.call(list.querySelectorAll('.card'),function(card){
+    var t2=document.createElement('img');t2.className='thumb2';t2.alt='';t2.setAttribute('aria-hidden','true');t2.hidden=true;t2.decoding='async';
+    card.appendChild(t2);
+    var slug=(card.getAttribute('href')||'').split('/').filter(Boolean).pop(),last=-1;
+    card.addEventListener('mouseenter',function(){
+      var l=pool[slug];
+      if(l&&l.length){var i=Math.floor(Math.random()*l.length);if(l.length>1&&i===last)i=(i+1)%l.length;last=i;t2.src=l[i];t2.hidden=false}
+      var v=card.querySelector('.cv video');if(v){v.muted=true;v.loop=true;v.preload='auto';var p=v.play();if(p&&p.catch)p.catch(function(){})}
+    });
+    card.addEventListener('mouseleave',function(){var v=card.querySelector('.cv video');if(v)v.pause()});
+    card.addEventListener('mousemove',function(e){
+      var r=card.getBoundingClientRect();
+      card.style.setProperty('--mx',(((e.clientX-r.left)/r.width-.5)*70).toFixed(1)+'px');
+    });
+  });
+})();
+
+/* Category pages (Works / Art / Lab): title letters, intro, and the list/grid revealed in sequence */
+(function(){
+  'use strict';
+  if(window.__EDIT__||matchMedia('(prefers-reduced-motion:reduce)').matches||!('IntersectionObserver' in window))return;
+  if(!document.querySelector('main.cat'))return;
+  var root=document.documentElement;root.classList.add('js-anim');
+  var t=document.querySelector('.cat-title'),k=0;
+  if(t&&!t.children.length){
+    var words=t.textContent.trim().split(/\s+/);t.setAttribute('aria-label',words.join(' '));t.textContent='';
+    words.forEach(function(w,wi){
+      var sw=document.createElement('span');sw.className='w';sw.setAttribute('aria-hidden','true');
+      w.split('').forEach(function(ch){var c=document.createElement('span');c.className='c';c.style.setProperty('--i',k++);c.textContent=ch;sw.appendChild(c)});
+      t.appendChild(sw);if(wi<words.length-1)t.appendChild(document.createTextNode(' '));
+    });
+  }
+  requestAnimationFrame(function(){requestAnimationFrame(function(){root.classList.add('anim-ready')})});
+
+  var cards=[].slice.call(document.querySelectorAll('.cards .card'));
+  cards.forEach(function(c){
+    var h=c.querySelector('.card-t h2, .card-t h3');
+    if(h&&!h.querySelector('.l')){var s=document.createElement('span');s.className='l';while(h.firstChild)s.appendChild(h.firstChild);h.appendChild(s)}
+  });
+  // cada lote que entra na tela anima em sequência (de cima para baixo / da esquerda para a direita)
+  var start=performance.now()+450,batch=0,lastT=0;
+  var io=new IntersectionObserver(function(en){
+    var now=performance.now();if(now-lastT>200)batch=0;lastT=now;
+    en.filter(function(e){return e.isIntersecting}).sort(function(a,b){return cards.indexOf(a.target)-cards.indexOf(b.target)}).forEach(function(e){
+      var wait=Math.max(0,start-now)/1000;           // na abertura, espera o título
+      e.target.style.setProperty('--d',(wait+batch*.07).toFixed(2)+'s');batch++;
+      e.target.classList.add('in');io.unobserve(e.target);
+    });
+  },{threshold:0,rootMargin:'0px 0px -6% 0px'});
+  cards.forEach(function(c){io.observe(c)});
 })();

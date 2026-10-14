@@ -2,6 +2,7 @@
    Vinicius Araujo — Portfolio
    ========================================================================== */
 @import url("https://fonts.googleapis.com/css2?family=Syncopate:wght@400;700&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Inter+Tight:wght@700;800&display=swap");
 
 :root{
   --bg:#fff;--grey:#f7f7f7;--ink:#000;--muted:#767676;
@@ -125,7 +126,11 @@ img{display:block;max-width:100%}
 .cat-head{padding:clamp(2rem,6vw,5rem) var(--gx) clamp(2rem,4vw,3.5rem)}
 .cat-title{margin:0;font:400 clamp(5rem,22vw,24rem)/.8 var(--display);letter-spacing:-.04em;text-transform:uppercase;margin-left:-.04em}
 .cat-intro{max-width:34ch;margin-top:clamp(1.25rem,2.5vw,2rem);margin-left:calc(50% + 2.5px);font:500 clamp(1.05rem,1.7vw,1.6rem)/1.2 var(--sans);letter-spacing:-.015em;text-transform:none}
-.cat .cards{padding-bottom:clamp(3rem,8vw,7rem)}
+.cat .cards{grid-template-columns:repeat(5,minmax(0,1fr));gap:clamp(1.25rem,2vw,2rem) 6px;padding-bottom:clamp(3rem,8vw,7rem)}
+.cat .card-t h2{font-size:clamp(.95rem,1.1vw,1.15rem)}
+.cat .card-t{flex-direction:column;gap:.2rem;padding-top:.55rem}
+.cat .card-t p{text-align:left;white-space:normal}
+@media (max-width:1400px){.cat .cards{grid-template-columns:repeat(4,minmax(0,1fr))}}
 .empty{padding:0 var(--gx) clamp(4rem,10vw,8rem);color:var(--muted)}
 .cards:has(.card)~.empty{display:none}
 
@@ -217,6 +222,46 @@ img{display:block;max-width:100%}
 .js-anim .grey .big .c{display:inline-block;transform:translateY(105%)}
 .js-anim .grey .big.in .c{transform:none;transition:transform 1.3s var(--soft) calc(var(--i,0)*110ms)}
 
+/* Works: typographic index (desktop with a mouse). Hover = black band + two floating thumbnails. */
+@media (hover:hover) and (min-width:761px){
+  .cards.is-index{display:block;padding:0 0 clamp(3rem,8vw,7rem)}
+  .cards.is-index .card{position:relative;display:flex;justify-content:center;padding:0 var(--gx);color:var(--ink);transition:background-color .2s,color .2s}
+  .cards.is-index .card:hover{background:#000;color:#fff;z-index:2}
+  .cards.is-index:has(.card:hover) .card:not(:hover){opacity:1}
+  .cards.is-index .card-t{position:relative;display:block;padding:0}
+  .cards.is-index .card-t :is(h2,h3){font:800 clamp(2.4rem,6.2vw,7.2rem)/.86 "Inter Tight",var(--sans);letter-spacing:-.045em;text-transform:uppercase;text-align:center;padding:.05em 0 .02em;color:inherit}
+  .cards.is-index .card-t p{position:absolute;right:100%;top:.7em;margin-right:.75rem;font:500 .62rem/1.25 var(--mono);text-transform:uppercase;letter-spacing:.02em;white-space:nowrap;text-align:right;color:inherit}
+  .cards.is-index .cv,.cards.is-index .thumb2{position:absolute;top:50%;z-index:3;pointer-events:none;opacity:0;transition:opacity .22s ease,transform .6s var(--soft,ease)}
+  .cards.is-index .cv{left:calc(10% + var(--mx,0px));width:clamp(140px,13vw,250px);aspect-ratio:4/5;transform:translate(0,-50%) scale(.88)}
+  .cards.is-index .thumb2{right:calc(9% - var(--mx,0px));width:clamp(200px,19vw,380px);aspect-ratio:16/10;object-fit:cover;transform:translate(0,-50%) scale(.88);background:var(--grey)}
+  .cards.is-index .card:hover .cv,.cards.is-index .card:hover .thumb2:not([hidden]){opacity:1;transform:translate(0,-50%) scale(1)}
+  .cards.is-index .card:hover .cv :is(img,video){transform:none}
+  .cards.is-index .thumb2[hidden]{display:block;opacity:0!important}
+}
+.thumb2{display:none}
+@media (hover:hover) and (min-width:761px){.cards.is-index .thumb2{display:block}}
+
+/* Category pages entrance */
+.js-anim .cat-title .w{display:inline-block;overflow:hidden;vertical-align:top;padding:.05em 0 .02em;margin:-.05em 0 -.02em}
+.js-anim .cat-title .c{display:inline-block;transform:translateY(105%)}
+.anim-ready .cat-title .c{transform:none;transition:transform 1.1s var(--soft) calc(var(--i)*55ms)}
+.js-anim .cat-intro{opacity:0;transform:translateY(16px)}
+.anim-ready .cat-intro{opacity:1;transform:none;transition:opacity .9s ease .45s,transform 1s var(--soft) .45s}
+/* índice (Works): o nome sobe por trás da máscara, a legenda aparece depois */
+.js-anim .cards .card-t :is(h2,h3){overflow:hidden}
+.js-anim .cards .card-t .l{display:inline-block;transform:translateY(108%)}
+.js-anim .cards .card.in .card-t .l{transform:none;transition:transform 1s var(--soft) var(--d,0s)}
+.js-anim .cards .card-t p{opacity:0}
+.js-anim .cards .card.in .card-t p{opacity:1;transition:opacity .6s ease calc(var(--d,0s) + .45s)}
+/* grid de cards (Art, Lab, celular): a imagem entra subindo */
+.js-anim .cards .card .cv{opacity:0;translate:0 26px}
+.js-anim .cards .card.in .cv{opacity:1;translate:0 0;transition:opacity .8s ease var(--d,0s),translate 1s var(--soft) var(--d,0s),transform .6s var(--soft)}
+@media (hover:hover) and (min-width:761px){
+  .js-anim .cards.is-index .card .cv,.js-anim .cards.is-index .card.in .cv{opacity:0;translate:0 0}
+  .js-anim .cards.is-index .card.in:hover .cv{opacity:1}
+  .js-anim .cards.is-index .card.in .cv{transition:opacity .22s ease,transform .6s var(--soft)}
+}
+
 /* 404 --------------------------------------------------------------------- */
 .nf{min-height:100svh;display:flex;flex-direction:column}
 .nf main{flex:1;display:flex;flex-direction:column;justify-content:flex-end;padding:0 var(--gx) 1rem}
@@ -234,7 +279,7 @@ img{display:block;max-width:100%}
   .cols{grid-template-columns:1fr 1fr}
   .cols .end{text-align:left}
   .clients{grid-template-columns:repeat(2,minmax(0,1fr))}
-  .cards,.feat .cards{grid-template-columns:1fr 1fr;gap:1.25rem 6px}
+  .cards,.feat .cards,.cat .cards{grid-template-columns:1fr 1fr;gap:1.25rem 6px}
   .card-t{flex-direction:column;gap:.15rem}
   .card-t p{text-align:left;white-space:normal}
   .feat-h .sect{margin-left:0}
@@ -247,6 +292,7 @@ img{display:block;max-width:100%}
   .clients{grid-template-columns:repeat(4,minmax(0,1fr))}
   .feat .cards{grid-template-columns:repeat(2,minmax(0,1fr))}
   .cards{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .cat .cards{grid-template-columns:repeat(3,minmax(0,1fr))}
 }
 
 @media (prefers-reduced-motion:reduce){
