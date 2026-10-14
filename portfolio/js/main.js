@@ -561,3 +561,39 @@
   },{threshold:0,rootMargin:'0px 0px -6% 0px'});
   cards.forEach(function(c){io.observe(c)});
 })();
+
+/* Home: on the first visit, gently scroll down to show the work section, then back up */
+(function(){
+  'use strict';
+  if(window.__EDIT__||!document.body.classList.contains('page-home'))return;
+  if(matchMedia('(prefers-reduced-motion:reduce)').matches||location.hash)return;
+  try{if(sessionStorage.getItem('vaTeased'))return;sessionStorage.setItem('vaTeased','1')}catch(e){}
+  var target=document.querySelector('.feat-grid')||document.querySelector('.sub');
+  if(!target)return;
+  var raf=0,cancelled=false,timer=0;
+  function stop(){cancelled=true;cancelAnimationFrame(raf);clearTimeout(timer);off()}
+  var evs=['wheel','touchstart','keydown','mousedown','pointerdown'];
+  function off(){evs.forEach(function(ev){removeEventListener(ev,stop,{capture:true})})}
+  evs.forEach(function(ev){addEventListener(ev,stop,{capture:true,passive:true})});
+  function ease(t){return t<.5?4*t*t*t:1-Math.pow(-2*t+2,3)/2}
+  function glide(to,dur,done){
+    var from=scrollY,t0=0;
+    function step(t){
+      if(cancelled)return;
+      if(!t0)t0=t;
+      var p=Math.min(1,(t-t0)/dur);
+      scrollTo(0,from+(to-from)*ease(p));
+      if(p<1)raf=requestAnimationFrame(step);else if(done)done();
+    }
+    raf=requestAnimationFrame(step);
+  }
+  timer=setTimeout(function(){
+    if(cancelled||scrollY>20)return off();
+    var max=document.documentElement.scrollHeight-innerHeight;
+    var to=Math.min(max,target.getBoundingClientRect().top+scrollY-innerHeight*.3);
+    if(to<innerHeight*.25)return off();
+    glide(to,1700,function(){
+      timer=setTimeout(function(){glide(0,1500,off)},1500);
+    });
+  },3600);
+})();
