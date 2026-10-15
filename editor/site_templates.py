@@ -223,6 +223,15 @@ def list_pages(site_dir):
     return sorted(pages, key=lambda p: (p.count('/'), p))
 
 
+HIDDEN_META = '<meta name="robots" content="noindex, nofollow">'
+
+
+def is_hidden(file):
+    """Projeto escondido (ainda não divulgado): fica fora do sitemap e do carrossel."""
+    with open(file, encoding='utf-8') as fh:
+        return HIDDEN_META in fh.read(6000)
+
+
 def page_title(file):
     with open(file, encoding='utf-8') as fh:
         m = re.search(r'<title>(.*?)</title>', fh.read(4000), re.S)
@@ -239,7 +248,8 @@ def write_sitemap(site_dir):
             domain = m.group(1)
     import time
     today = time.strftime('%Y-%m-%d')
-    urls = ''.join(f'  <url>\n    <loc>{esc(domain + p)}</loc>\n    <lastmod>{today}</lastmod>\n  </url>\n' for p in list_pages(site_dir))
+    urls = ''.join(f'  <url>\n    <loc>{esc(domain + p)}</loc>\n    <lastmod>{today}</lastmod>\n  </url>\n' for p in list_pages(site_dir)
+                   if not is_hidden(page_path_to_file(site_dir, p)))
     with open(os.path.join(site_dir, 'sitemap.xml'), 'w', encoding='utf-8', newline='\n') as fh:
         fh.write('<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n' + urls + '</urlset>\n')
 
@@ -290,7 +300,7 @@ def build_carousel(site_dir):
     urls, keep = [], set()
     for p in list_pages(site_dir):
         m = re.match(r'^/(%s)/([^/]+)/$' % '|'.join(CAROUSEL_CATS), p)
-        if not m:
+        if not m or is_hidden(page_path_to_file(site_dir, p)):
             continue
         slug = m.group(2)
         with open(page_path_to_file(site_dir, p), encoding='utf-8') as fh:
