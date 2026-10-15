@@ -421,6 +421,8 @@ def main():
     port = free_port(wanted)
     if port != wanted:
         print(f'\n  Atenção: a porta {wanted} está ocupada por outro programa; usando a porta {port}.')
+    ThreadingHTTPServer.request_queue_size = 256  # o padrão (5) recusa conexões quando a página pede muitas imagens/vídeos juntos
+    ThreadingHTTPServer.daemon_threads = True
     srv = ThreadingHTTPServer(('127.0.0.1', port), Handler)
     url = f'http://localhost:{port}/'
     print(f'\n  Editor do site rodando em {url}')
