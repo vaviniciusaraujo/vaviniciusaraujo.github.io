@@ -12,7 +12,7 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 SITE = os.path.normpath(os.path.join(HERE, '..', '..', 'portfolio'))
 
 FEATURE = ['/works/microsoft-surface-2026/', '/works/oura-2025/', '/works/nike-2025/',
-           '/art/porsche-landscape/', '/works/sony/', '/lab/fluid/']
+           '/art/porsche-landscape/', '/works/cointreau/', '/art/36days-electronics/']
 
 # Três ritmos que se alternam: (tipo, colunas, proporção)
 PATTERNS = [
