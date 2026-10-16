@@ -711,3 +711,35 @@
     });
   });
 })();
+
+/* Home: indicador de rolagem perto do nome ------------------------------------- */
+(function(){
+  'use strict';
+  var h=document.querySelector('.hero h1');
+  if(!h||!window.matchMedia||!matchMedia('(hover:hover) and (pointer:fine)').matches)return;
+  var cue=document.createElement('div');cue.className='scroll-cue';cue.setAttribute('aria-hidden','true');
+  cue.innerHTML='<i class="mouse"></i><i class="arr"></i><span>Scroll</span>';
+  document.body.appendChild(cue);
+  var NEAR=90,on=false,tx=0,ty=0,x=0,y=0,raf=0;
+  function tick(){
+    x+=(tx-x)*.2;y+=(ty-y)*.2;
+    cue.style.setProperty('--x',x.toFixed(1)+'px');cue.style.setProperty('--y',y.toFixed(1)+'px');
+    raf=(Math.abs(tx-x)>.3||Math.abs(ty-y)>.3)?requestAnimationFrame(tick):0;
+  }
+  function set(v){if(v!==on){on=v;cue.classList.toggle('on',v);h.classList.toggle('cue-on',v)}}
+  addEventListener('mousemove',function(e){
+    var r=h.getBoundingClientRect();
+    var near=!document.documentElement.classList.contains('ve-on')&&scrollY<120&&e.clientX>r.left-NEAR&&e.clientX<r.right+NEAR&&e.clientY>r.top-NEAR&&e.clientY<r.bottom+NEAR;
+    tx=e.clientX+26;ty=e.clientY-cue.offsetHeight/2;
+    if(near&&!on){x=tx;y=ty}
+    set(near);
+    if(!raf)raf=requestAnimationFrame(tick);
+  },{passive:true});
+  addEventListener('scroll',function(){if(scrollY>=120)set(false)},{passive:true});
+  document.addEventListener('mouseleave',function(){set(false)});
+  h.addEventListener('click',function(){
+    if(!on)return;
+    var m=document.getElementById('main');
+    if(m)window.scrollTo({top:m.getBoundingClientRect().top+scrollY,behavior:'smooth'});
+  });
+})();
