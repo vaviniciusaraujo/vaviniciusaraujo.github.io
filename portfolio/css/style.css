@@ -392,3 +392,9 @@ img{display:block;max-width:100%}
 @keyframes cueDot{0%{transform:translateY(0);opacity:1}70%{transform:translateY(16px);opacity:0}100%{transform:translateY(0);opacity:0}}
 @keyframes cueArr{0%,100%{transform:translateY(-3px) rotate(45deg);opacity:.35}50%{transform:translateY(3px) rotate(45deg);opacity:1}}
 @media (prefers-reduced-motion:reduce){.scroll-cue .mouse::after,.scroll-cue .arr{animation:none}}
+
+/* VIN: efeito líquido no hover (WebGL) */
+.grey .big{cursor:pointer}
+.grey .big.liq{position:relative}
+.grey .big.liq .c{color:transparent}
+.big-liq{position:absolute;left:0;top:0;width:100%;height:100%;pointer-events:none;display:block}

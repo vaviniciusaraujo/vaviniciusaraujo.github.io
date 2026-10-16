@@ -743,3 +743,96 @@
     if(m)window.scrollTo({top:m.getBoundingClientRect().top+scrollY,behavior:'smooth'});
   });
 })();
+
+/* Home: VIN com efeito líquido quando o mouse passa ----------------------------- */
+(function(){
+  'use strict';
+  var big=document.querySelector('.grey .big');
+  if(!big||!window.matchMedia||!matchMedia('(hover:hover) and (pointer:fine)').matches)return;
+  if(matchMedia('(prefers-reduced-motion:reduce)').matches)return;
+  var N=24,cv,gl,prog,tex,U={},trail=[],hover=0,want=0,raf=0,last=0,mouse=[-1e4,-1e4],ready=false,dpr=1,W=0,H=0;
+  var VS='attribute vec2 p;void main(){gl_Position=vec4(p,0.,1.);}';
+  var FS='precision highp float;uniform sampler2D T;uniform vec2 R,M;uniform float t,h,rad;uniform vec4 P['+N+'];uniform float A['+N+'];uniform vec3 C;'+
+    'void main(){vec2 f=gl_FragCoord.xy;vec2 o=vec2(0.);'+
+    'for(int i=0;i<'+N+';i++){vec2 d=f-P[i].xy;float w=exp(-dot(d,d)/(rad*rad))*A[i];o+=P[i].zw*w;'+
+      'o+=vec2(-d.y,d.x)/rad*w*A[i]*rad*.18*sin(t*2.+float(i));}'+
+    'vec2 d=f-M;float r=length(d);'+
+    'o+=(r>0.?d/r:vec2(0.))*sin(r/(rad*.22)-t*5.)*exp(-r/(rad*1.6))*rad*.07*h;'+
+    'o+=vec2(sin(f.y/(rad*.5)+t*1.7),cos(f.x/(rad*.6)+t*1.3))*rad*.025*h*exp(-r/(rad*3.));'+
+    'float a=texture2D(T,(f-o)/R).a;gl_FragColor=vec4(C*a,a);}';
+  function sh(type,src){var s=gl.createShader(type);gl.shaderSource(s,src);gl.compileShader(s);return gl.getShaderParameter(s,gl.COMPILE_STATUS)?s:null}
+  function init(){
+    cv=document.createElement('canvas');cv.className='big-liq';cv.setAttribute('aria-hidden','true');
+    gl=cv.getContext('webgl',{premultipliedAlpha:true,alpha:true,antialias:false});
+    if(!gl)return false;
+    var v=sh(gl.VERTEX_SHADER,VS),f=sh(gl.FRAGMENT_SHADER,FS);if(!v||!f)return false;
+    prog=gl.createProgram();gl.attachShader(prog,v);gl.attachShader(prog,f);gl.linkProgram(prog);
+    if(!gl.getProgramParameter(prog,gl.LINK_STATUS))return false;
+    gl.useProgram(prog);
+    var b=gl.createBuffer();gl.bindBuffer(gl.ARRAY_BUFFER,b);gl.bufferData(gl.ARRAY_BUFFER,new Float32Array([-1,-1,1,-1,-1,1,1,1]),gl.STATIC_DRAW);
+    var loc=gl.getAttribLocation(prog,'p');gl.enableVertexAttribArray(loc);gl.vertexAttribPointer(loc,2,gl.FLOAT,false,0,0);
+    ['T','R','M','t','h','rad','P','A','C'].forEach(function(n){U[n]=gl.getUniformLocation(prog,n)});
+    tex=gl.createTexture();gl.bindTexture(gl.TEXTURE_2D,tex);
+    gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_MIN_FILTER,gl.LINEAR);gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_MAG_FILTER,gl.LINEAR);
+    gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_WRAP_S,gl.CLAMP_TO_EDGE);gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_WRAP_T,gl.CLAMP_TO_EDGE);
+    big.appendChild(cv);
+    return true;
+  }
+  // desenha as letras exatamente onde o navegador as colocou
+  function paint(){
+    var br=big.getBoundingClientRect();dpr=Math.min(devicePixelRatio||1,2);
+    W=Math.round(br.width*dpr);H=Math.round(br.height*dpr);cv.width=W;cv.height=H;
+    var c2=document.createElement('canvas');c2.width=W;c2.height=H;var x=c2.getContext('2d');
+    var cs=getComputedStyle(big);x.font=cs.fontStyle+' '+cs.fontWeight+' '+parseFloat(cs.fontSize)*dpr+'px '+cs.fontFamily;
+    x.textBaseline='alphabetic';x.fillStyle='#000';
+    var asc=x.measureText('VIN').fontBoundingBoxAscent||parseFloat(cs.fontSize)*dpr*.9;
+    [].forEach.call(big.querySelectorAll('.c'),function(s){
+      var rg=document.createRange();rg.selectNodeContents(s);var r=rg.getBoundingClientRect();
+      x.fillText(s.textContent,(r.left-br.left)*dpr,(r.top-br.top)*dpr+asc);
+    });
+    gl.bindTexture(gl.TEXTURE_2D,tex);gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL,true);
+    gl.texImage2D(gl.TEXTURE_2D,0,gl.RGBA,gl.RGBA,gl.UNSIGNED_BYTE,c2);
+    gl.viewport(0,0,W,H);
+    var col=getComputedStyle(big).color.match(/[\d.]+/g)||[0,0,0];
+    gl.uniform3f(U.C,col[0]/255,col[1]/255,col[2]/255);
+  }
+  function frame(now){
+    var dt=Math.min(.05,(now-(last||now))/1000);last=now;
+    hover+=(want-hover)*Math.min(1,dt*4);
+    trail.forEach(function(p){p.a-=dt*1.1});trail=trail.filter(function(p){return p.a>0});
+    var P=new Float32Array(N*4),A=new Float32Array(N);
+    trail.slice(-N).forEach(function(p,i){P[i*4]=p.x;P[i*4+1]=p.y;P[i*4+2]=p.vx;P[i*4+3]=p.vy;A[i]=p.a*p.a});
+    gl.uniform1i(U.T,0);gl.uniform2f(U.R,W,H);gl.uniform2f(U.M,mouse[0],mouse[1]);
+    gl.uniform1f(U.t,now/1000);gl.uniform1f(U.h,hover);gl.uniform1f(U.rad,Math.max(60,H*.16));
+    gl.uniform4fv(U.P,P);gl.uniform1fv(U.A,A);
+    gl.clearColor(0,0,0,0);gl.clear(gl.COLOR_BUFFER_BIT);gl.drawArrays(gl.TRIANGLE_STRIP,0,4);
+    raf=(trail.length||hover>.002||want)?requestAnimationFrame(frame):0;
+    if(!raf){last=0;gl.clear(gl.COLOR_BUFFER_BIT);gl.drawArrays(gl.TRIANGLE_STRIP,0,4)}
+  }
+  function start(){if(!raf)raf=requestAnimationFrame(frame)}
+  var px=null,inside=false;
+  function setup(){
+    if(ready)return true;
+    if(!big.classList.contains('in'))return false;
+    // só depois que as letras terminaram de subir
+    if([].some.call(big.querySelectorAll('.c'),function(s){var m=getComputedStyle(s).transform;return m&&m!=='none'&&!/^matrix\(1, 0, 0, 1, 0, 0\)$/.test(m)}))return false;
+    if(!init())return false;
+    big.classList.add('liq');paint();ready=true;
+    addEventListener('resize',function(){paint();start()});
+    if(document.fonts&&document.fonts.ready)document.fonts.ready.then(function(){paint();start()});
+    return true;
+  }
+  big.addEventListener('mouseenter',function(){
+    // espera a animação de entrada das letras terminar
+    inside=true;(function go(n){if(!inside)return;if(setup()){want=1;start()}else if(n>0)setTimeout(function(){go(n-1)},250)})(12);
+  });
+  big.addEventListener('mouseleave',function(){inside=false;want=0;px=null;if(ready)start()});
+  big.addEventListener('mousemove',function(e){
+    if(!ready)return;
+    var r=big.getBoundingClientRect(),x=(e.clientX-r.left)*dpr,y=(r.bottom-e.clientY)*dpr;
+    mouse=[x,y];
+    if(px){var vx=x-px[0],vy=y-px[1],m=Math.hypot(vx,vy),k=m>60?60/m:1;trail.push({x:x,y:y,vx:vx*k*1.6,vy:vy*k*1.6,a:1})}
+    px=[x,y];if(trail.length>N*3)trail.splice(0,trail.length-N*3);
+    want=1;start();
+  });
+})();
