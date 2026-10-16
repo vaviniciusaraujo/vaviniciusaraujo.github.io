@@ -341,14 +341,35 @@
     var ok=SETS[set].filter(function(f){return crop(f,it.r)<=.62&&f!==prev});
     return ok.length?ok[Math.floor(rand()*ok.length)]:best(it,set);
   }
-  function caption(fig,i){
+  function capText(fig){
     var m=fig.querySelector('img,video'),a=m?(m.getAttribute('alt')||m.getAttribute('aria-label')||''):'';
     a=a.split(/\s[–-]\s/).pop().replace(/%20|_/g,' ').replace(/\b(va|rnd|v\d+|\d{4}|\d+(-\d+)*)\b/gi,'').replace(/\s+/g,' ').trim();
-    var title=(document.querySelector('.proj-title')||{}).textContent||'';
+    var pt=document.querySelector('.proj-title'),title=pt?(pt.getAttribute('aria-label')||pt.textContent):'';
     if(!a||title.toLowerCase().indexOf(a.toLowerCase())===0)a=title.trim();
-    fig.setAttribute('data-cap',a.length>34?a.slice(0,33)+'…':a);
-    fig.setAttribute('data-n',(i+1<10?'0':'')+(i+1));
+    return a.length>40?a.slice(0,39)+'…':a;
   }
+  // textos para os espaços ao lado das imagens: a nota escrita no editor (data-note) tem prioridade;
+  // depois a descrição do projeto e a ficha técnica
+  function notePool(){
+    var pool=[],intro=document.querySelector('.proj-intro');
+    if(intro&&intro.textContent.trim())pool.push({text:intro.textContent.trim()});
+    var meta=[].map.call(document.querySelectorAll('.proj-meta>div'),function(d){
+      var dt=d.querySelector('dt'),dd=d.querySelector('dd');return dt&&dd?[dt.textContent.trim(),dd.textContent.trim()]:null}).filter(Boolean);
+    if(meta.length)pool.push({meta:meta});
+    return pool;
+  }
+  function ann(m){
+    var a=m.querySelector(':scope>.mosaic-ann');
+    if(!a){a=document.createElement('div');a.className='mosaic-ann';a.setAttribute('aria-hidden','true');m.appendChild(a)}
+    return a;
+  }
+  function mk(a,cls,key,fig){
+    var e=fig[key];
+    if(!e||e.parentNode!==a){e=document.createElement('div');e.className=cls;a.appendChild(e);fig[key]=e}
+    return e;
+  }
+  function setHTML(e,v){if(e.__t!==v){e.__t=v;e.innerHTML=v}}
+  function escH(t){return String(t).replace(/[&<>"]/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]})}
   function layout(m){
     var figs=[].filter.call(m.children,function(c){return c.classList.contains('ph')});
     var cs=getComputedStyle(m),pl=parseFloat(cs.paddingLeft),pt=parseFloat(cs.paddingTop);
@@ -357,9 +378,13 @@
     var mobile=W<700,T=mobile?MOB:DESK,cols=mobile?6:12,colW=(W-GAP*(cols-1))/cols;
     var rowGap=mobile?Math.max(24,W*.08):Math.min(110,Math.max(40,W*.05));
     var rand=rng((m.getAttribute('data-seed')||'')+location.pathname);
+    var A=ann(m),CAP=mobile?20:24,pool=[],rowN=0,used=[];   // textos laterais: só legenda + número (notePool fora)
+    m.classList.add('has-ann');
     var items=figs.map(function(f,i){
-      var r=parseFloat(f.style.getPropertyValue('--ar'));caption(f,i);
-      return {el:f,r:r>0?r:1.5,fmt:F[f.getAttribute('data-fmt')]?f.getAttribute('data-fmt'):null};
+      var r=parseFloat(f.style.getPropertyValue('--ar'));
+      var cap=mk(A,'cap','__cap',f);
+      setHTML(cap,'<span>'+escH(capText(f))+'</span><span>'+(i+1<10?'0':'')+(i+1)+'</span>');
+      return {el:f,r:r>0?r:1.5,fmt:F[f.getAttribute('data-fmt')]?f.getAttribute('data-fmt'):null,cap:cap};
     });
     var y=0,i=0,hist=[];
     while(i<items.length){
@@ -380,17 +405,52 @@
       slots.forEach(function(sl,j){
         var it=items[i+j],f=pick(it,sl[2],rand,prev),span=sl[1];prev=f;
         var w=span*colW+(span-1)*GAP,h=w/F[f];
-        cells.push({it:it,f:f,x:(sl[0]-1)*(colW+GAP),w:w,h:h,al:sl[3]});rowH=Math.max(rowH,h);
+        cells.push({it:it,f:f,c0:sl[0],span:span,x:(sl[0]-1)*(colW+GAP),w:w,h:h,al:sl[3]});rowH=Math.max(rowH,h+CAP);
       });
+      // nota ao lado de uma imagem: nota própria (data-note) ou, em linhas alternadas, um texto do projeto
+      var note=null;
+      if(!mobile){
+        var occ=[];cells.forEach(function(c){for(var k=c.c0;k<c.c0+c.span;k++)occ[k]=1});
+        for(var q=0;q<cells.length&&!note;q++){
+          var c=cells[q],own=c.it.el.getAttribute('data-note');
+          if(!own&&(rowN%2||rowN===0))continue;   // sem texto automático na primeira linha
+          var sides=[[c.c0+c.span,1],[c.c0-1,-1]];
+          for(var sdx=0;sdx<2&&!note;sdx++){
+            var st0=sides[sdx][0],dir=sides[sdx][1],free=0;
+            while(free<3&&st0+dir*free>=1&&st0+dir*free<=cols&&!occ[st0+dir*free])free++;
+            if(free>=2){
+              var span2=Math.min(3,free),cs0=dir>0?st0:st0-span2+1;
+              var txt=own?{text:own}:pool.length?pool.shift():{title:capText(c.it.el),sub:'Frame '+(items.indexOf(c.it)+1<10?'0':'')+(items.indexOf(c.it)+1)+' / '+items.length};
+              note={cell:c,c0:cs0,span:span2,text:txt,side:dir};
+            }
+          }
+        }
+      }
+      var noteEl=null;
+      if(note){
+        noteEl=mk(A,'note','__note',note.cell.it.el);
+        var nt=note.text,html=nt.title?'<h4>'+escH(nt.title)+'</h4><span>'+escH(nt.sub)+'</span>':nt.meta?'<dl>'+nt.meta.map(function(pp){return '<div><dt>'+escH(pp[0])+'</dt><dd>'+escH(pp[1])+'</dd></div>'}).join('')+'</dl>':'<p>'+escH(nt.text)+'</p>';
+        setHTML(noteEl,html);
+        var nw=note.span*colW+(note.span-1)*GAP-14;
+        noteEl.style.width=nw.toFixed(0)+'px';noteEl.classList.toggle('is-left',note.side<0);
+        rowH=Math.max(rowH,noteEl.offsetHeight);
+        used.push(noteEl);
+      }
       cells.forEach(function(c){
-        var st=c.it.el.style,top=c.al==='b'?y+rowH-c.h:y;
+        var st=c.it.el.style,top=c.al==='b'?y+rowH-c.h-CAP:y;
         st.left=(pl+c.x).toFixed(2)+'px';st.top=(pt+top).toFixed(2)+'px';
         st.width=c.w.toFixed(2)+'px';st.height=c.h.toFixed(2)+'px';
         c.it.el.setAttribute('data-mask',c.f);
-        if(c.w<190)c.it.el.setAttribute('data-small','');else c.it.el.removeAttribute('data-small');
+        var cp=c.it.cap.style;cp.left=(pl+c.x).toFixed(2)+'px';cp.top=(pt+top+c.h+7).toFixed(2)+'px';cp.width=c.w.toFixed(2)+'px';
+        c.it.cap.classList.toggle('is-small',c.w<170);
+        if(note&&note.cell===c){
+          var ns=noteEl.style;ns.left=(pl+(note.c0-1)*(colW+GAP)+(note.side>0?14:0)).toFixed(2)+'px';ns.top=(pt+top).toFixed(2)+'px';
+        }
       });
-      hist.push(ch.k);i+=tpl.length;y+=rowH+rowGap;
+      hist.push(ch.k);i+=tpl.length;y+=rowH+rowGap;rowN++;
     }
+    // remove notas que não couberam nesta composição
+    [].slice.call(A.querySelectorAll('.note')).forEach(function(n){if(used.indexOf(n)<0)n.remove()});
     m.style.height=(pt+y-rowGap)+'px';
     m.classList.add('is-laid');
   }
@@ -403,7 +463,10 @@
     var w=ms.map(function(m){return m.clientWidth}).join();if(w!==lastW){lastW=w;all()}});ms.forEach(function(m){ro.observe(m)})}
   else addEventListener('resize',all);
   // o editor adiciona / move / remove itens, muda máscara ou sorteia nova variação
-  if('MutationObserver' in window)ms.forEach(function(m){new MutationObserver(all).observe(m,{childList:true,subtree:true,attributes:true,attributeFilter:['data-fmt','data-seed','alt','aria-label']})});
+  if('MutationObserver' in window)ms.forEach(function(m){new MutationObserver(function(list){
+    // mudanças só na camada de legendas/notas não refazem o layout (evita loop)
+    if(list.some(function(r){var t=r.target.nodeType===1?r.target:r.target.parentNode;return !(t&&t.closest&&t.closest('.mosaic-ann'))}))all();
+  }).observe(m,{childList:true,subtree:true,attributes:true,attributeFilter:['data-fmt','data-seed','data-note','alt','aria-label']})});
 })();
 
 /* Project pages: entrance + scroll animations ----------------------------------
@@ -445,6 +508,7 @@
       var f=e.target,m=f.parentElement,x=parseFloat(f.style.left)||0,W=m.clientWidth||1;
       f.style.setProperty('--d',(x/W*.45+rnd()*.12).toFixed(2)+'s');
       f.classList.add('in');io.unobserve(f);
+      [f.__cap,f.__note].forEach(function(a){if(a){a.style.setProperty('--d',f.style.getPropertyValue('--d'));a.classList.add('in')}});
     });
   },{threshold:0,rootMargin:'0px 0px -8% 0px'});  // threshold 0: a máscara inicial zera a área visível
   // só observa depois que o grid calculou as posições finais (antes disso tudo está empilhado no topo)

@@ -75,6 +75,7 @@
   function removeEl(el) { both(el, function (e) { e.remove(); }); markDirty(); hideToolbars(); }
   function moveEl(el, dir, okSibling) {
     var sib = dir < 0 ? el.previousElementSibling : el.nextElementSibling;
+    while (sib && !sib.hasAttribute('data-eid')) sib = dir < 0 ? sib.previousElementSibling : sib.nextElementSibling;  // pula camadas criadas pelo site (legendas)
     if (!sib || (okSibling && !okSibling(sib))) return toast(dir < 0 ? 'Já está no começo' : 'Já está no fim');
     var s = S(el), ss = S(sib);
     if (dir < 0) { sib.before(el); ss.before(s); } else { sib.after(el); ss.after(s); }
@@ -289,6 +290,10 @@
     }
     itemBar.appendChild(btn(m ? 'Trocar' : 'Adicionar', function () { pickFiles(false, function (f) { replaceMedia(item, f[0]); }); }, 'Trocar por outra imagem ou vídeo'));
     if (m) itemBar.appendChild(btn('Alt', function () { editAlt(item); }, 'Descrição (acessibilidade e Google)'));
+    if (!cover) itemBar.appendChild(btn('Nota', function () {
+      var v = prompt('Texto que aparece ao lado desta imagem na galeria (deixe vazio para tirar):', item.getAttribute('data-note') || '');
+      if (v != null) setAttr(item, 'data-note', v.trim() || null);
+    }, 'Texto ao lado da imagem'));
     if (!cover) {
       itemBar.appendChild(btn('Usar como capa', function () { swapWithCover(item); }, 'Troca esta mídia com a capa do projeto'));
       itemBar.appendChild(sep());

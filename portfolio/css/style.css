@@ -314,6 +314,28 @@ img{display:block;max-width:100%}
   .cards.is-stack .cv{aspect-ratio:16/10}
 }
 
+/* Gallery captions under the images + text notes beside some of them */
+.mosaic.has-ann .ph::before,.mosaic.has-ann .ph::after{content:none}
+.mosaic-ann{position:absolute;inset:0;pointer-events:none;z-index:2}
+.mosaic-ann .cap{position:absolute;display:flex;justify-content:space-between;gap:1rem;font:400 .6rem/1.2 var(--mono);text-transform:uppercase;letter-spacing:.02em;color:var(--ink)}
+.mosaic-ann .cap span:first-child{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.mosaic-ann .cap span:last-child{color:var(--muted)}
+.mosaic-ann .cap.is-small span:first-child{display:none}
+.mosaic-ann .cap.is-small{justify-content:flex-end}
+.mosaic-ann .note{position:absolute;font:500 clamp(.78rem,.86vw,.95rem)/1.32 var(--sans);letter-spacing:-.005em;text-transform:none;color:var(--ink)}
+.mosaic-ann .note p{margin:0;max-width:30ch}
+.mosaic-ann .note.is-left{text-align:right}
+.mosaic-ann .note.is-left p{margin-left:auto}
+.mosaic-ann .note dl{margin:0;display:grid;gap:.35rem;max-width:32ch}
+.mosaic-ann .note.is-left dl{margin-left:auto}
+.mosaic-ann .note dl div{display:grid;grid-template-columns:5.5rem 1fr;gap:.8rem;border-top:1px solid #e3e3e3;padding-top:.35rem;font:400 .62rem/1.3 var(--mono);text-transform:uppercase;text-align:left}
+.mosaic-ann .note dt{color:var(--muted)}
+.mosaic-ann .note dd{margin:0}
+.mosaic-ann .note h4{margin:0 0 .35rem;font:500 clamp(1.15rem,1.5vw,1.7rem)/1.02 var(--sans);letter-spacing:-.025em;text-transform:none}
+.mosaic-ann .note h4+span{display:block;font:400 .6rem/1.2 var(--mono);text-transform:uppercase;color:var(--muted)}
+.js-anim .mosaic-ann>*{opacity:0;transform:translateY(8px)}
+.js-anim .mosaic-ann>.in{opacity:1;transform:none;transition:opacity .7s ease calc(var(--d,0s) + .55s),transform .8s var(--soft) calc(var(--d,0s) + .55s)}
+
 /* 404 --------------------------------------------------------------------- */
 .nf{min-height:100svh;display:flex;flex-direction:column}
 .nf main{flex:1;display:flex;flex-direction:column;justify-content:flex-end;padding:0 var(--gx) 1rem}

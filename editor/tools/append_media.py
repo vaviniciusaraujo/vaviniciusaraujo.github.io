@@ -28,6 +28,8 @@ def main():
     ap.add_argument('page', help='ex.: lab/misc  (= /lab/misc/)')
     ap.add_argument('files', nargs='+', help='arquivos de origem (caminhos a partir da pasta site 2026)')
     ap.add_argument('--cover', default='')
+    ap.add_argument('--replace', action='store_true', help='troca a galeria inteira pela mídia indicada (textos e ficha ficam)')
+    ap.add_argument('--keep-card', action='store_true', help='não muda a capa do card na página da categoria')
     a = ap.parse_args()
 
     cat, slug = a.page.strip('/').split('/')
@@ -60,7 +62,7 @@ def main():
     mos = re.search(r'(<section class="mosaic"[^>]*>)(.*?)(\n\s*</section>)', t, re.S)
     if not mos:
         raise SystemExit('Galeria (mosaico) não encontrada na página.')
-    body = mos.group(2)
+    body = '' if a.replace else mos.group(2)
     if cover:
         m, alt, full, name = cover
         cv = re.search(r'(<section class="proj-cover"[^>]*>\s*)(<figure class="ph"[^>]*>.*?</figure>)', t, re.S)
@@ -68,18 +70,20 @@ def main():
         old_inner = re.sub(r'^<figure[^>]*>|</figure>$', '', old).replace(' fetchpriority="high"', ' loading="lazy"')
         ow = re.search(r'width="(\d+)" height="(\d+)"', old_inner)
         oar = round(int(ow.group(1)) / int(ow.group(2)), 4) if ow else 1.5
-        body = f'\n    <figure class="ph" style="--ar:{oar}">{old_inner}</figure>' + body
+        if not a.replace:
+            body = f'\n    <figure class="ph" style="--ar:{oar}">{old_inner}</figure>' + body
         t = t[:cv.start(2)] + T.cover_html(m, alt) + t[cv.end(2):]
         # card da categoria com a capa nova (vídeo curto para o card)
-        card = dict(m)
-        if m['kind'] == 'video':
-            card['src'] = IP.to_url(IP.card_video(os.path.join(IP.SITE, m['src'].lstrip('/')), out, name))
-        cat_file = os.path.join(IP.SITE, cat, 'index.html')
-        ct = IP.read(cat_file)
-        rx = re.compile(r'(<a class="card" href="/' + re.escape(f'{cat}/{slug}/') + r'">\s*<figure class="cv"[^>]*>)(.*?)(</figure>)', re.S)
-        ct, n = rx.subn(lambda mm: mm.group(1) + T.media_html(card, title) + mm.group(3), ct, count=1)
-        if n:
-            IP.write(cat_file, ct)
+        if not a.keep_card:
+            card = dict(m)
+            if m['kind'] == 'video':
+                card['src'] = IP.to_url(IP.card_video(os.path.join(IP.SITE, m['src'].lstrip('/')), out, name))
+            cat_file = os.path.join(IP.SITE, cat, 'index.html')
+            ct = IP.read(cat_file)
+            rx = re.compile(r'(<a class="card" href="/' + re.escape(f'{cat}/{slug}/') + r'">\s*<figure class="cv"[^>]*>)(.*?)(</figure>)', re.S)
+            ct, n = rx.subn(lambda mm: mm.group(1) + T.media_html(card, title) + mm.group(3), ct, count=1)
+            if n:
+                IP.write(cat_file, ct)
         img = m['poster'] if m['kind'] == 'video' else m['src']
         t = re.sub(r'(<meta (?:property="og:image"|name="twitter:image") content="https?://[^/"]+)[^"]*"', lambda mm: mm.group(1) + img + '"', t)
         mos = re.search(r'(<section class="mosaic"[^>]*>)(.*?)(\n\s*</section>)', t, re.S)
