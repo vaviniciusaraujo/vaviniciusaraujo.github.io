@@ -957,54 +957,5 @@
   if(page){
     refit(page);intro(page,function(){anim(page)});
     addEventListener('resize',function(){fit(page);photo(page)});
-    var cl=page.querySelector('[data-ab-close]');
-    if(cl)cl.addEventListener('click',function(e){
-      var r=D.referrer;
-      if(r&&r.indexOf(location.origin)===0&&history.length>1){e.preventDefault();history.back()}
-    });
-    return;
   }
-  if(!window.fetch||!window.DOMParser)return;
-  function load(){
-    if(!cache)cache=fetch('/about/').then(function(r){return r.ok?r.text():Promise.reject()}).then(function(t){
-      return new DOMParser().parseFromString(t,'text/html').querySelector('.ab');
-    });
-    return cache;
-  }
-  function open(push){
-    if(layer)return;
-    load().then(function(ab){
-      if(layer||!ab)return;
-      ab=D.importNode(ab,true);
-      layer=D.createElement('div');layer.className='ab-layer';layer.setAttribute('role','dialog');layer.setAttribute('aria-modal','true');layer.setAttribute('aria-label','About');
-      layer.appendChild(ab);D.body.appendChild(layer);H.classList.add('ab-lock');
-      if(push){history.pushState({ab:1},'','/about/');pushed=true}
-      D.title='About – Vinicius Araujo';
-      ab.querySelector('[data-ab-close]').addEventListener('click',function(e){e.preventDefault();close(true)});
-      refit(ab);
-      requestAnimationFrame(function(){layer.classList.add('on');intro(layer,function(){anim(ab)})});
-      ab.querySelector('[data-ab-close]').focus({preventScroll:true});
-    },function(){location.href='/about/'});
-  }
-  var title=D.title;
-  function close(fromBtn){
-    if(!layer)return;
-    if(fromBtn&&pushed){pushed=false;history.back();return}   // popstate fecha a camada
-    var l=layer;layer=null;l.classList.remove('on');H.classList.remove('ab-lock');D.title=title;
-    setTimeout(function(){l.remove()},420);
-  }
-  D.addEventListener('click',function(e){
-    var a=e.target.closest&&e.target.closest('a[href^="/about/"]');
-    if(!a||e.metaKey||e.ctrlKey||e.shiftKey||e.button)return;
-    if(H.classList.contains('ve-on'))return;              // no editor, abre a página normal
-    e.preventDefault();open(true);
-  });
-  addEventListener('popstate',function(){
-    if(location.pathname.replace(/\/+$/,'/')==='/about/')open(false);
-    else{pushed=false;close(false)}
-  });
-  D.addEventListener('keydown',function(e){if(e.key==='Escape'&&layer)close(true)});
-  addEventListener('resize',function(){if(layer){var a=layer.querySelector('.ab');fit(a);photo(a)}});
-  // carrega antes, quando o mouse passa pelo link
-  D.addEventListener('mouseover',function(e){if(e.target.closest&&e.target.closest('a[href^="/about/"]'))load()},{passive:true});
 })();
