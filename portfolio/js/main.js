@@ -896,15 +896,7 @@
       scr.forEach(function(s,i){scramble(s,(s.closest('.ab-meta')?300:950)+i*55)});
     })});
   }
-  // foto: guarda a largura para animar a altura até a proporção inteira no hover
-  function photo(root){
-    var f=root.querySelector('.ab-photo'),im=f&&f.querySelector('img');if(!f)return;
-    f.style.setProperty('--pw',f.clientWidth+'px');
-    var w=+im.getAttribute('width'),h=+im.getAttribute('height');if(w&&h)f.style.setProperty('--pr',(h/w).toFixed(4));
-    if(!f.__t){f.__t=1;f.addEventListener('click',function(){if(!matchMedia('(hover:hover)').matches)f.classList.toggle('open')});
-      if(window.ResizeObserver)new ResizeObserver(function(){f.style.setProperty('--pw',f.clientWidth+'px')}).observe(f)}
-  }
-  function refit(root){fit(root);photo(root);if(D.fonts&&D.fonts.ready)D.fonts.ready.then(function(){fit(root)})}
+  function refit(root){fit(root);if(D.fonts&&D.fonts.ready)D.fonts.ready.then(function(){fit(root)})}
 
   // intro: letras de VINICIUS ARAUJO esticando numa coluna que rola, depois se multiplica e recolhe
   function intro(host,done){
@@ -956,6 +948,6 @@
   var page=D.querySelector('body.ab-page .ab');
   if(page){
     refit(page);intro(page,function(){anim(page)});
-    addEventListener('resize',function(){fit(page);photo(page)});
+    addEventListener('resize',function(){fit(page)});
   }
 })();
