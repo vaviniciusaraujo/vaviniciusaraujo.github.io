@@ -402,7 +402,7 @@ img{display:block;max-width:100%}
 /* About: página preta que abre por cima do site --------------------------------- */
 .ab-page{--bg:#000;--ink:#ecebe6;--muted:#8d8d88;margin:0;background:#000;color:var(--ink)}
 .ab-page .bar a{color:inherit}
-.ab{--fg:#ecebe6;position:relative;overflow-x:hidden;display:flex;flex-direction:column;padding:clamp(1rem,2vw,2rem) var(--gx) var(--gx);background:#000;color:var(--fg);font:400 .68rem/1.3 var(--mono);text-transform:uppercase;letter-spacing:.01em}
+.ab{--fg:#ecebe6;position:relative;overflow-x:clip;display:flex;flex-direction:column;padding:clamp(1rem,2vw,2rem) var(--gx) var(--gx);background:#000;color:var(--fg);font:400 .68rem/1.3 var(--mono);text-transform:uppercase;letter-spacing:.01em}
 .ab a{color:inherit;text-decoration:none;transition:opacity .2s}
 .ab a:hover{opacity:.55}
 .ab p{margin:0}
@@ -416,7 +416,7 @@ img{display:block;max-width:100%}
 @media (prefers-reduced-motion:reduce){.ab-mq{animation:none}}
 .ab-meta{display:flex;justify-content:space-between;gap:1rem;margin-top:.7rem}
 .ab-mid{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:var(--gx);margin-top:.7rem}
-.ab-photo{margin:0;aspect-ratio:4/3;overflow:hidden;background:#111;cursor:pointer}
+.ab-photo{margin:0;width:69%;aspect-ratio:4/3;overflow:hidden;background:#111;cursor:pointer}
 .ab-photo[style*="--pw"]{aspect-ratio:auto;height:calc(var(--pw)*.75);transition:height .9s cubic-bezier(.16,1,.3,1)}
 .ab-photo picture{display:block}
 .ab-photo img{display:block;width:100%;height:auto}
@@ -434,6 +434,7 @@ img{display:block;max-width:100%}
 .ab-sign{font-size:clamp(4rem,13vw,13rem)}
 @media (max-width:760px){
   .ab-mid,.ab-lines{grid-template-columns:1fr}
+  .ab-photo{width:100%}
   .ab-lines .r{text-align:left}
   .ab-meta{flex-wrap:wrap}
   .ab-note{margin-left:0}
