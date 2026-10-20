@@ -836,3 +836,175 @@
     want=1;start();
   });
 })();
+
+/* About: abre por cima do site, fundo preto, com Close ---------------------------- */
+(function(){
+  'use strict';
+  var D=document,H=D.documentElement,layer=null,pushed=false,cache=null;
+  // ajusta os títulos grandes para ocuparem a largura disponível
+  function fit(root){
+    [].forEach.call(root.querySelectorAll('.ab-kicker,.ab-year'),function(el){
+      var box=el.parentElement,cs=getComputedStyle(box);
+      var w=box.clientWidth-parseFloat(cs.paddingLeft)-parseFloat(cs.paddingRight);
+      el.style.fontSize='100px';
+      var rg=D.createRange();rg.selectNodeContents(el);var tw=rg.getBoundingClientRect().width;
+      if(tw>0)el.style.fontSize=(100*w/tw*.995).toFixed(2)+'px';
+    });
+  }
+  // texto em mono "decodificando": letras aleatórias que se resolvem da esquerda para a direita
+  function scramble(el,delay){
+    var nodes=[],w=D.createTreeWalker(el,NodeFilter.SHOW_TEXT,null),n;
+    while((n=w.nextNode()))if(n.nodeValue.trim())nodes.push([n,n.nodeValue]);
+    var len=nodes.reduce(function(s,a){return s+a[1].length},0),dur=450+len*9,G='ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789/#—·';
+    setTimeout(function(){
+      el.style.visibility='visible';var t0=performance.now();
+      (function f(now){
+        var p=Math.min(1,(now-t0)/dur),k=0;
+        nodes.forEach(function(a){
+          var s='';for(var i=0;i<a[1].length;i++,k++){var c=a[1][i];s+=(c===' '||k<p*len*1.1-2)?c:G[Math.random()*G.length|0]}
+          a[0].nodeValue=s;
+        });
+        if(p<1)requestAnimationFrame(f);else nodes.forEach(function(a){a[0].nodeValue=a[1]});
+      })(t0);
+    },delay);
+  }
+  function count(el,from,to,delay,dur){
+    el.textContent=('0'+from).slice(-2);
+    setTimeout(function(){
+      var t0=performance.now();
+      (function f(now){
+        var p=Math.min(1,(now-t0)/dur),e=1-Math.pow(1-p,3);
+        el.textContent=('0'+Math.round(from+(to-from)*e)).slice(-2);
+        if(p<1)requestAnimationFrame(f);
+      })(t0);
+    },delay);
+  }
+  function anim(ab){
+    var k=ab.querySelector('.ab-kicker');
+    if(k&&!k.querySelector('.w')){
+      k.innerHTML=k.textContent.trim().split(/\s+/).map(function(w){return '<span class="w"><span>'+w.replace(/&/g,'&amp;').replace(/</g,'&lt;')+'</span></span>'}).join(' ');
+      fit(ab);
+    }
+    [].forEach.call(ab.querySelectorAll('.ab-kicker .w>span'),function(s,i){s.style.setProperty('--d',(i*.045).toFixed(3)+'s')});
+    [].forEach.call(ab.querySelectorAll('.ab-note>p'),function(s,i){s.style.setProperty('--d',(.6+i*.13).toFixed(2)+'s')});
+    var scr=[].slice.call(ab.querySelectorAll('.ab-meta>span,.ab-lines p,.ab-foot>p:last-child'));
+    scr.forEach(function(s){s.setAttribute('data-scr','')});
+    ab.classList.add('ab-anim');
+    var c=ab.querySelector('.ab-cnt');if(c)count(c,6,27,800,1300);
+    requestAnimationFrame(function(){requestAnimationFrame(function(){
+      ab.classList.add('in');
+      scr.forEach(function(s,i){scramble(s,(s.closest('.ab-meta')?300:950)+i*55)});
+    })});
+  }
+  // foto: guarda a largura para animar a altura até a proporção inteira no hover
+  function photo(root){
+    var f=root.querySelector('.ab-photo'),im=f&&f.querySelector('img');if(!f)return;
+    f.style.setProperty('--pw',f.clientWidth+'px');
+    var w=+im.getAttribute('width'),h=+im.getAttribute('height');if(w&&h)f.style.setProperty('--pr',(h/w).toFixed(4));
+    if(!f.__t){f.__t=1;f.addEventListener('click',function(){if(!matchMedia('(hover:hover)').matches)f.classList.toggle('open')});
+      if(window.ResizeObserver)new ResizeObserver(function(){f.style.setProperty('--pw',f.clientWidth+'px')}).observe(f)}
+  }
+  function refit(root){fit(root);photo(root);if(D.fonts&&D.fonts.ready)D.fonts.ready.then(function(){fit(root)})}
+
+  // intro: letras de VINICIUS ARAUJO esticando numa coluna que rola, depois se multiplica e recolhe
+  function intro(host,done){
+    if(matchMedia('(prefers-reduced-motion:reduce)').matches){done();return}
+    var cv=D.createElement('canvas'),x=cv.getContext('2d');
+    if(!x){done();return}
+    cv.className='ab-intro';cv.setAttribute('aria-hidden','true');host.appendChild(cv);
+    var dpr=Math.min(devicePixelRatio||1,2),W,H,TXT='VINICIUSARAUJO',F='800 200px "Inter Tight","Archivo Black",sans-serif',m={},t0=0,end=false,raf;
+    function size(){W=cv.width=Math.round(innerWidth*dpr);H=cv.height=Math.round(innerHeight*dpr)}
+    function metr(){
+      x.font=F;
+      TXT.split('').forEach(function(c){var k=x.measureText(c);m[c]={w:k.width,a:k.actualBoundingBoxAscent,h:k.actualBoundingBoxAscent+k.actualBoundingBoxDescent}});
+      m.M2=x.measureText('M').width;
+    }
+    function ease(v){v=Math.max(0,Math.min(1,v));return .5-.5*Math.cos(Math.PI*v)}
+    function col(cx,cw,top,hh,s,dir){
+      var N=4.2,sx=cw*.9/m.M2;
+      for(var k=Math.floor(-s)-2;k<Math.ceil(N-s)+2;k++){
+        var u0=(k+s)/N,u1=(k+1+s)/N;if(u1<=0||u0>=1)continue;
+        var y0=top+hh*ease(u0),y1=top+hh*ease(u1),h=y1-y0;if(h<.5)continue;
+        var i=((dir>0?k:-k)%TXT.length+TXT.length)%TXT.length,c=TXT[i],g=m[c];
+        x.save();x.translate(cx,y0);x.scale(sx,h/g.h);x.fillText(c,-g.w/2,g.a);x.restore();
+      }
+    }
+    function frame(now){
+      if(!t0)t0=now;var t=(now-t0)/1000;
+      x.setTransform(1,0,0,1,0,0);x.fillStyle='#000';x.fillRect(0,0,W,H);x.fillStyle='#ecebe6';x.font=F;
+      var n=t<.95?1:t<1.45?3:5;                         // cortes secos: 1 → 3 → 5 colunas
+      var cw=n===1?Math.min(W*.34,H*.5):W/n;
+      var out=ease((t-1.95)/.45);                        // recolhe para cima no final
+      var hh=H*(1-out),top=0;
+      for(var j=0;j<n;j++){
+        var cx=n===1?W/2:cw*(j+.5),dir=j%2?-1:1;
+        col(cx,cw,top,hh,(t*3.2+j*.7)*dir,dir);
+      }
+      if(t<2.45&&!end)raf=requestAnimationFrame(frame);else finish();
+    }
+    function finish(){
+      if(end)return;end=true;cancelAnimationFrame(raf);
+      cv.style.opacity='0';setTimeout(function(){cv.remove()},380);done();
+    }
+    size();
+    cv.addEventListener('click',finish);
+    addEventListener('keydown',function k(){removeEventListener('keydown',k);finish()});
+    var go=function(){metr();raf=requestAnimationFrame(frame)};
+    if(D.fonts&&D.fonts.load)Promise.race([D.fonts.load(F,TXT),new Promise(function(r){setTimeout(r,400)})]).then(go,go);else go();
+  }
+  // página /about/ aberta direto
+  var page=D.querySelector('body.ab-page .ab');
+  if(page){
+    refit(page);intro(page,function(){anim(page)});
+    addEventListener('resize',function(){fit(page);photo(page)});
+    var cl=page.querySelector('[data-ab-close]');
+    if(cl)cl.addEventListener('click',function(e){
+      var r=D.referrer;
+      if(r&&r.indexOf(location.origin)===0&&history.length>1){e.preventDefault();history.back()}
+    });
+    return;
+  }
+  if(!window.fetch||!window.DOMParser)return;
+  function load(){
+    if(!cache)cache=fetch('/about/').then(function(r){return r.ok?r.text():Promise.reject()}).then(function(t){
+      return new DOMParser().parseFromString(t,'text/html').querySelector('.ab');
+    });
+    return cache;
+  }
+  function open(push){
+    if(layer)return;
+    load().then(function(ab){
+      if(layer||!ab)return;
+      ab=D.importNode(ab,true);
+      layer=D.createElement('div');layer.className='ab-layer';layer.setAttribute('role','dialog');layer.setAttribute('aria-modal','true');layer.setAttribute('aria-label','About');
+      layer.appendChild(ab);D.body.appendChild(layer);H.classList.add('ab-lock');
+      if(push){history.pushState({ab:1},'','/about/');pushed=true}
+      D.title='About – Vinicius Araujo';
+      ab.querySelector('[data-ab-close]').addEventListener('click',function(e){e.preventDefault();close(true)});
+      refit(ab);
+      requestAnimationFrame(function(){layer.classList.add('on');intro(layer,function(){anim(ab)})});
+      ab.querySelector('[data-ab-close]').focus({preventScroll:true});
+    },function(){location.href='/about/'});
+  }
+  var title=D.title;
+  function close(fromBtn){
+    if(!layer)return;
+    if(fromBtn&&pushed){pushed=false;history.back();return}   // popstate fecha a camada
+    var l=layer;layer=null;l.classList.remove('on');H.classList.remove('ab-lock');D.title=title;
+    setTimeout(function(){l.remove()},420);
+  }
+  D.addEventListener('click',function(e){
+    var a=e.target.closest&&e.target.closest('a[href^="/about/"]');
+    if(!a||e.metaKey||e.ctrlKey||e.shiftKey||e.button)return;
+    if(H.classList.contains('ve-on'))return;              // no editor, abre a página normal
+    e.preventDefault();open(true);
+  });
+  addEventListener('popstate',function(){
+    if(location.pathname.replace(/\/+$/,'/')==='/about/')open(false);
+    else{pushed=false;close(false)}
+  });
+  D.addEventListener('keydown',function(e){if(e.key==='Escape'&&layer)close(true)});
+  addEventListener('resize',function(){if(layer){var a=layer.querySelector('.ab');fit(a);photo(a)}});
+  // carrega antes, quando o mouse passa pelo link
+  D.addEventListener('mouseover',function(e){if(e.target.closest&&e.target.closest('a[href^="/about/"]'))load()},{passive:true});
+})();

@@ -207,7 +207,7 @@ def write(path, text):
         fh.write(text)
 
 
-NAV = '<nav aria-label="Main"><a href="/works/">Works</a>, <a href="/art/">Art</a>, <a href="/lab/">Lab</a>, <a href="/#about">About</a></nav>'
+NAV = '<nav aria-label="Main"><a href="/works/">Works</a>, <a href="/art/">Art</a>, <a href="/lab/">Lab</a>, <a href="/about/">About</a></nav>'
 
 
 def shared_blocks(home):
