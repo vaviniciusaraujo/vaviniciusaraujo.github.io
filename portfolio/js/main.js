@@ -951,3 +951,24 @@
     addEventListener('resize',function(){fit(page)});
   }
 })();
+
+/* Works (projetos): o banner encolhe conforme a página rola ----------------------- */
+(function(){
+  'use strict';
+  var f=document.querySelector('.proj-cover .ph');
+  if(!f||location.pathname.indexOf('/works/')!==0)return;
+  if(window.matchMedia&&matchMedia('(prefers-reduced-motion:reduce)').matches)return;
+  var MIN=.78,tick=false,top0=0,h=0;
+  f.style.transformOrigin='0 100%';                 // canto de baixo à esquerda fica fixo
+  function measure(){var r=f.getBoundingClientRect();top0=r.top+scrollY;h=r.height||1}
+  function update(){
+    tick=false;
+    var p=Math.max(0,Math.min(1,scrollY/(top0+h*.9)));
+    p=p*p*(3-2*p);                                   // suave no começo e no fim
+    f.style.scale=(1-(1-MIN)*p).toFixed(4);
+  }
+  function req(){if(!tick){tick=true;requestAnimationFrame(update)}}
+  measure();update();
+  addEventListener('scroll',req,{passive:true});
+  addEventListener('resize',function(){f.style.scale='';measure();req()});
+})();

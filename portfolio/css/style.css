@@ -138,8 +138,9 @@ img{display:block;max-width:100%}
 .proj-title{margin:0;font:400 clamp(3rem,11vw,13rem)/.85 var(--display);letter-spacing:-.035em;text-transform:uppercase;margin-left:-.03em;overflow-wrap:anywhere}
 .proj-info{display:grid;grid-template-columns:repeat(12,1fr);column-gap:6px;margin-top:clamp(1.5rem,3vw,2.5rem)}
 .proj-intro{grid-column:1/8;max-width:38ch;font:500 clamp(1.05rem,1.7vw,1.6rem)/1.2 var(--sans);letter-spacing:-.015em;text-transform:none}
-.proj-meta{grid-column:9/13;margin:0;display:grid;gap:.5rem;align-content:start}
-.proj-meta div{display:grid;grid-template-columns:7rem 1fr;gap:1rem;border-top:1px solid #e6e6e6;padding-top:.5rem}
+.proj-meta{grid-column:9/13;margin:0;display:grid;grid-template-columns:max-content 1fr;gap:.5rem 1rem;align-content:start}
+.proj-meta div{grid-column:1/-1;grid-template-columns:subgrid!important}
+.proj-meta div{display:grid;grid-template-columns:minmax(7rem,max-content) 1fr;gap:1rem;border-top:1px solid #e6e6e6;padding-top:.5rem}
 .proj-meta dt{color:var(--muted)}
 .proj-meta dd{margin:0}
 /* Cover + editorial scattered grid. main.js places masked images on 12 columns with white space; this flex rule is the no-JS fallback. */
@@ -253,6 +254,10 @@ img{display:block;max-width:100%}
   .cards.is-index:has(.card:hover) .card:not(:hover){opacity:1}
   .cards.is-index .card-t{position:relative;display:block;padding:0}
   .cards.is-index .card-t :is(h2,h3){font:800 clamp(2.4rem,6.2vw,7.2rem)/.86 "Inter Tight",var(--sans);letter-spacing:-.045em;text-transform:uppercase;text-align:center;padding:.05em 0 .02em;color:inherit}
+  .cards.is-index .card-t :is(h2,h3){transition:transform .6s var(--soft,cubic-bezier(.16,1,.3,1));transform-origin:50% 55%}
+  .cards.is-index .card:hover .card-t :is(h2,h3){transform:scale(1.1)}
+  .cards.is-index .card{transition:background-color .2s,color .2s,padding .6s var(--soft,cubic-bezier(.16,1,.3,1))}
+  .cards.is-index .card:hover{padding-top:.34vw;padding-bottom:.34vw}
   .cards.is-index .card-t p{position:absolute;right:100%;top:.7em;margin-right:.75rem;font:500 .62rem/1.25 var(--mono);text-transform:uppercase;letter-spacing:.02em;white-space:nowrap;text-align:right;color:inherit}
   .cards.is-index .cv,.cards.is-index .thumb2{position:absolute;top:50%;z-index:3;pointer-events:none;opacity:0;transition:opacity .22s ease,transform .6s var(--soft,ease)}
   .cards.is-index .cv{left:calc(10% + var(--mx,0px));width:clamp(140px,13vw,250px);aspect-ratio:4/5;transform:translate(0,-50%) scale(.88)}

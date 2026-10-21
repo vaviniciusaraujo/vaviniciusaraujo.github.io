@@ -53,7 +53,7 @@ def main():
     domain = re.search(r'<link rel="canonical" href="(https?://[^"/]+)', home).group(1)
     header = T.SHARED_BLOCKS[0].search(home).group(0)
     footer = T.SHARED_BLOCKS[1].search(home).group(0)
-    meta = ([('Client', a.client)] if a.client else []) + ([('Year', a.year)] if a.year else []) + [('Role', a.role)]
+    meta = ([('Client', a.client)] if a.client else []) + ([('Year', a.year)] if a.year else []) + [('Role', a.role)] + ([('Direction, Design & Animation', 'ManvsMachine')] if cat == 'works' else [])
     img = cover['poster'] if cover['kind'] == 'video' else cover['src']
     IP.write(page_file, T.project_page(cat=cat, slug=slug, title=a.title, intro=a.intro, meta=meta, media=media,
                                        alts=alts, domain=domain, header=header, footer=footer, image=img))
