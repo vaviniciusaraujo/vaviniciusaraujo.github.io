@@ -312,6 +312,19 @@ img{display:block;max-width:100%}
   .cards.is-stack .card:hover{transform:translateY(-16px);box-shadow:0 -26px 54px -8px rgba(0,0,0,.75)}
   .cards.is-stack .card:hover~.card{transform:translateY(var(--R))}
 }
+.cards.is-stack .card[data-n]::before{content:attr(data-n)}
+/* Art: duas pilhas lado a lado */
+.cards.is-stack.two{--P:clamp(70px,6.4vw,112px);--H:clamp(300px,25vw,470px);--R:clamp(110px,10vw,190px);display:grid;grid-template-columns:1fr 1fr;column-gap:clamp(1rem,3vw,3rem);align-items:start}
+.cards.is-stack.two .stack-col{min-width:0}
+.cards.is-stack.two .card{width:min(100%,calc(84% + var(--k,0)*2.6%))}
+.cards.is-stack.two .card-t :is(h2,h3){font-size:clamp(1.8rem,3.5vw,3.9rem)}
+@media (max-width:760px){
+  .cards.is-stack.two{display:flex;flex-direction:column}
+  .cards.is-stack.two .stack-col{display:contents}
+  .cards.is-stack.two .stack-col .card{width:100%;margin-top:14px}
+  .cards.is-stack.two .stack-col .card[data-n="1"]{margin-top:0}
+  .cards.is-stack.two .card-t :is(h2,h3){font-size:clamp(2.6rem,6.6vw,7rem)}
+}
 @media (max-width:760px){
   .cards.is-stack{--H:auto}
   .cards.is-stack .card{height:auto;width:100%;margin-top:14px;grid-template-rows:auto auto auto}

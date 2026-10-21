@@ -46,7 +46,9 @@ def sizes_for(page, html, pos):
         return '(max-width:760px) 100vw, 34vw'
     if rel == 'works/index.html':                             # lista Works: miniatura no hover / grid no celular
         return '(hover:hover) and (min-width:761px) 250px, 100vw'
-    if rel in ('art/index.html', 'lab/index.html'):           # folhas empilhadas
+    if rel == 'art/index.html':                               # folhas empilhadas em 2 colunas
+        return '(max-width:760px) 100vw, 46vw'
+    if rel == 'lab/index.html':                               # folhas empilhadas
         return '(max-width:760px) 100vw, 60vw'
     m = html.find('<section class="mosaic"')
     if m == -1 or pos < m:                                    # capa do projeto

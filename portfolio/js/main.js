@@ -584,7 +584,18 @@
   'use strict';
   [].forEach.call(document.querySelectorAll('.cards[data-cat="art"], .cards[data-cat="lab"]'),function(list){
     list.classList.add('is-stack');
-    [].forEach.call(list.querySelectorAll('.card'),function(c,i){c.style.setProperty('--k',i)});
+    var cards=[].slice.call(list.querySelectorAll('.card'));
+    if(list.getAttribute('data-cat')==='art'&&cards.length>3){
+      // Art: duas pilhas lado a lado (1, 3, 5… à esquerda; 2, 4, 6… à direita)
+      list.classList.add('two');
+      var cols=[0,1].map(function(){var d=document.createElement('div');d.className='stack-col';list.appendChild(d);return d});
+      cards.forEach(function(c,i){
+        c.setAttribute('data-n',i+1);c.style.order=i;
+        c.style.setProperty('--k',Math.floor(i/2));cols[i%2].appendChild(c);
+      });
+      return;
+    }
+    cards.forEach(function(c,i){c.style.setProperty('--k',i)});
   });
 })();
 
