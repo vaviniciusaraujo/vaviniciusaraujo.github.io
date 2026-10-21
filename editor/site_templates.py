@@ -240,7 +240,7 @@ def page_title(file):
 
 def write_sitemap(site_dir):
     idx = os.path.join(site_dir, 'index.html')
-    domain = 'https://vaviniciusaraujo.github.io'
+    domain = 'https://viniciusaraujova.com'
     if os.path.exists(idx):
         with open(idx, encoding='utf-8') as fh:
             m = re.search(r'<link rel="canonical" href="(https?://[^"/]+)', fh.read())

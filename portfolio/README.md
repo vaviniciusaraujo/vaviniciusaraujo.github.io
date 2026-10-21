@@ -31,7 +31,7 @@ New projects are best added through the editor (Works / Art / Lab page → “+ 
 
 ## Publishing
 
-Published with GitHub Pages at https://vaviniciusaraujo.github.io — the workflow in
+Published with GitHub Pages at https://viniciusaraujova.com — the workflow in
 `.github/workflows/pages.yml` (repository root) deploys this folder on every push to `main`.
 
 ## Editar o site (editor visual)
