@@ -91,6 +91,8 @@ def main():
     t = t[:mos.start(2)] + body + t[mos.end(2):]
     IP.write(page, t)
     T.build_carousel(IP.SITE)
+    import responsive_images  # versões 480/960/1440 + srcset
+    responsive_images.main()
     IP.log(f'/{cat}/{slug}/: +{len(new) + (1 if cover else 0)} mídias' + (' (capa nova)' if cover else ''))
 
 

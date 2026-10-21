@@ -72,6 +72,8 @@ def main():
 
     T.write_sitemap(IP.SITE)
     T.build_carousel(IP.SITE)
+    import responsive_images  # versões 480/960/1440 + srcset
+    responsive_images.main()
     IP.log(f'Pronto: /{cat}/{slug}/ ({len(media)} mídias) e card em /{cat}/')
 
 

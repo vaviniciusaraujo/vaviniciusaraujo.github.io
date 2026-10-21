@@ -307,7 +307,9 @@ def build_carousel(site_dir):
             t = fh.read()
         start = t.find('class="proj-cover"')
         body = t[start:] if start >= 0 else t
-        srcs = re.findall(r'<source srcset="([^"]+)"', body) + re.findall(r'poster="([^"]+)"', body)
+        # srcset pode listar vários tamanhos ("x-480.webp 480w, ..., x.webp 1920w"): usa o último, o original
+        srcs = [s.split(',')[-1].strip().split()[0] for s in re.findall(r'<source srcset="([^"]+)"', body)]
+        srcs += re.findall(r'poster="([^"]+)"', body)
         seen = set()
         for u in srcs:
             if not u.startswith('/') or u in seen:

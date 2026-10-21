@@ -440,6 +440,8 @@
         var st=c.it.el.style,top=c.al==='b'?y+rowH-c.h-CAP:y;
         st.left=(pl+c.x).toFixed(2)+'px';st.top=(pt+top).toFixed(2)+'px';
         st.width=c.w.toFixed(2)+'px';st.height=c.h.toFixed(2)+'px';
+        // diz ao navegador a largura real em que a imagem aparece (com o corte da máscara), para baixar o tamanho certo
+        var so=c.it.el.querySelector('picture>source[sizes]');if(so){var sw=Math.ceil(Math.max(c.w,c.h*c.it.r))+'px';if(so.getAttribute('sizes')!==sw)so.setAttribute('sizes',sw)}
         c.it.el.setAttribute('data-mask',c.f);
         var cp=c.it.cap.style;cp.left=(pl+c.x).toFixed(2)+'px';cp.top=(pt+top+c.h+7).toFixed(2)+'px';cp.width=c.w.toFixed(2)+'px';
         c.it.cap.classList.toggle('is-small',c.w<170);
@@ -952,11 +954,11 @@
   }
 })();
 
-/* Works (projetos): o banner encolhe conforme a página rola ----------------------- */
+/* Projetos (Works, Art, Lab): o banner encolhe conforme a página rola ----------------------- */
 (function(){
   'use strict';
   var f=document.querySelector('.proj-cover .ph');
-  if(!f||location.pathname.indexOf('/works/')!==0)return;
+  if(!f||!/^\/(works|art|lab)\//.test(location.pathname))return;
   if(window.matchMedia&&matchMedia('(prefers-reduced-motion:reduce)').matches)return;
   var MIN=.78,tick=false,top0=0,h=0;
   f.style.transformOrigin='0 100%';                 // canto de baixo à esquerda fica fixo
