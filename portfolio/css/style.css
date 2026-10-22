@@ -520,3 +520,26 @@ img{display:block;max-width:100%}
   .cards.is-stack[data-cat="lab"] .card:hover{transform:translateY(-16px) var(--tilt)}
   .cards.is-stack[data-cat="lab"] .card:hover~.card{transform:translateY(var(--R)) var(--tilt)}
 }
+/* Lab: descrição de arquivo do lado direito do título de cada folha */
+.cards.is-stack .card-d{display:none}
+.cards.is-stack[data-cat="lab"] .card-d{display:block;grid-area:2/3/3/4;align-self:end;justify-self:end;width:min(54ch,40vw);margin:0 0 .35rem 1rem;
+  font:400 .7rem/1.45 var(--mono);text-transform:none;letter-spacing:0;color:#000;text-align:left;white-space:normal}
+.cards.is-stack[data-cat="lab"] .card-d span{display:block;text-transform:uppercase;letter-spacing:.04em;color:#767676}
+.cards.is-stack[data-cat="lab"] .card-d span+span{margin-bottom:.35rem;color:#000}
+.cards.is-stack[data-cat="lab"] .card-t :is(h2,h3){grid-area:2/1/3/3}
+@media (max-width:760px){
+  .cards.is-stack[data-cat="lab"] .card-t :is(h2,h3){grid-area:2/1/3/4}
+  .cards.is-stack[data-cat="lab"] .card-d{grid-area:3/1/4/4;justify-self:start;width:auto;margin:.5rem 0 0}
+  .cards.is-stack[data-cat="lab"] .cv{grid-area:4/1/5/4}
+  .cards.is-stack[data-cat="lab"] .card{grid-template-rows:auto auto auto auto}
+}
+/* Lab: cada folha com uma diagramação diferente (3 variações que se alternam) */
+@media (min-width:761px){
+  /* B: título à direita, descrição à esquerda e no alto */
+  .cards.is-stack[data-cat="lab"] .card:nth-child(3n+2) .card-t :is(h2,h3){grid-area:2/2/3/4;justify-self:end;text-align:right}
+  .cards.is-stack[data-cat="lab"] .card:nth-child(3n+2) .card-d{grid-area:2/1/3/2;justify-self:start;align-self:start;margin:.35rem 1rem 0 0}
+  .cards.is-stack[data-cat="lab"] .card:nth-child(3n+2) .card-t p{justify-self:start}
+  /* C: título à esquerda, descrição à direita alinhada pela direita e no alto; etiqueta no canto */
+  .cards.is-stack[data-cat="lab"] .card:nth-child(3n) .card-d{align-self:start;text-align:right;margin:.35rem 0 0 1rem}
+  .cards.is-stack[data-cat="lab"] .card:nth-child(3n) .card-t p{justify-self:end}
+}
