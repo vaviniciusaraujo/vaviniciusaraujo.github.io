@@ -1057,11 +1057,11 @@
   addEventListener('keydown',function k(){removeEventListener('keydown',k);finish(true)});
 })();
 
-/* Transição só quando o destino é um projeto (/works|art|lab/nome/); o resto navega sem efeito */
+/* Transição entre todas as páginas do site (menu, projetos, links internos); voltar/avançar no navegador abre sem efeito */
 addEventListener('pageswap',function(e){
   var vt=e.viewTransition;if(!vt)return;
   var to=null;try{to=new URL(e.activation.entry.url)}catch(err){}
-  var proj=to&&to.origin===location.origin&&/^\/(works|art|lab)\/[^\/]+\/$/.test(to.pathname);
+  var same=to&&to.origin===location.origin&&to.pathname!==location.pathname;
   var back=e.activation&&e.activation.navigationType==='traverse';
-  if(!proj||back||document.documentElement.classList.contains('ve-on')||matchMedia('(prefers-reduced-motion:reduce)').matches)vt.skipTransition();
+  if(!same||back||document.documentElement.classList.contains('ve-on')||matchMedia('(prefers-reduced-motion:reduce)').matches)vt.skipTransition();
 });

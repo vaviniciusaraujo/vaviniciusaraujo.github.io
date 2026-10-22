@@ -495,8 +495,8 @@ img{display:block;max-width:100%}
 .a2 .cards:has(.card:hover) .card:not(:hover){opacity:1}   /* sem transparência nas outras: só a capa vem para frente */
 .a2 .card:hover .cv :is(img,video){transform:none}
 
-/* Transição ao abrir um projeto: a página nova sobe e cobre a atual (View Transitions entre páginas).
-   O main.js cancela a transição em qualquer navegação que não seja para um projeto. */
+/* Transição entre páginas: a página nova sobe e cobre a atual (View Transitions entre páginas).
+   O main.js cancela no voltar/avançar do navegador e no modo de edição. */
 @view-transition{navigation:auto}
 @keyframes vtUp{from{transform:translateY(100%)}to{transform:translateY(0)}}
 @keyframes vtBack{to{transform:translateY(-8%);filter:brightness(.55)}}
@@ -504,3 +504,19 @@ img{display:block;max-width:100%}
 ::view-transition-new(root){animation:vtUp .85s cubic-bezier(.76,0,.24,1) both}
 ::view-transition-old(root){animation:vtBack .85s cubic-bezier(.76,0,.24,1) both}
 @media (prefers-reduced-motion:reduce){::view-transition-new(root),::view-transition-old(root){animation:none}}
+
+/* Lab: sem o título grande (fica só para leitores de tela) e com fundo branco */
+.vh{position:absolute!important;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+.cat-head.no-title .cat-intro{margin-top:0}
+.cards.is-stack[data-cat="lab"]{background:#fff}
+.cards.is-stack[data-cat="lab"] .card{box-shadow:0 -14px 30px -10px rgba(0,0,0,.28),0 0 0 1px rgba(0,0,0,.06)}
+@media (hover:hover) and (min-width:761px){.cards.is-stack[data-cat="lab"] .card:hover{box-shadow:0 -22px 44px -10px rgba(0,0,0,.35),0 0 0 1px rgba(0,0,0,.06)}}
+/* Lab: folhas em perspectiva vistas de cima, como na referência (a base de cada folha "foge" para trás) */
+@media (min-width:761px){
+  .cards.is-stack[data-cat="lab"]{--tilt:perspective(1500px) rotateX(-13deg);--P:clamp(115px,12.6vw,202px)}
+  .cards.is-stack[data-cat="lab"] .card{transform-origin:50% 0;transform:var(--tilt)}
+}
+@media (hover:hover) and (min-width:761px){
+  .cards.is-stack[data-cat="lab"] .card:hover{transform:translateY(-16px) var(--tilt)}
+  .cards.is-stack[data-cat="lab"] .card:hover~.card{transform:translateY(var(--R)) var(--tilt)}
+}
