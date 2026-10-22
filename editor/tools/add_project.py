@@ -69,6 +69,14 @@ def main():
     body = m.group(2)
     body = ('\n    ' + card_html + body) if a.first else (body.rstrip() + '\n    ' + card_html)
     IP.write(cat_file, t[:m.start(2)] + body + t[m.end(2):])
+    if cat == 'art':  # a página que o menu chama de "Art" é a /art-2/ (cascata); /art/ virou "Art Out"
+        f2 = os.path.join(IP.SITE, 'art-2', 'index.html')
+        if os.path.exists(f2):
+            t2 = IP.read(f2)
+            m2 = re.search(r'(<div class="cards" data-cat="art2">)(.*?)(\n  </div>\n  </div>)', t2, re.S)
+            if m2:
+                b2 = ('\n    ' + card_html + m2.group(2)) if a.first else (m2.group(2).rstrip() + '\n    ' + card_html)
+                IP.write(f2, t2[:m2.start(2)] + b2 + t2[m2.end(2):])
 
     T.write_sitemap(IP.SITE)
     T.build_carousel(IP.SITE)

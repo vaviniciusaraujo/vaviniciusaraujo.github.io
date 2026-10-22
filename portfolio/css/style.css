@@ -474,3 +474,33 @@ img{display:block;max-width:100%}
 @media (prefers-reduced-motion:reduce){.ab-anim *{transition:none!important;clip-path:none!important;transform:none!important;translate:none!important;opacity:1!important;visibility:visible!important}}
 
 .ab-intro{position:fixed;inset:0;width:100%;height:100%;z-index:5;background:#000;cursor:pointer;transition:opacity .35s ease}
+
+/* Art 2: galeria experimental — colagem de folhas sobre fundo preto + intro em cascata (Paciência) */
+.a2-page{--bg:#000;--ink:#ecebe6;--muted:#8d8d88;background:#000;color:var(--ink)}
+.a2-page .bar a,.a2-page .foot a{color:inherit}
+.a2{padding:0 0 clamp(3rem,6vw,5rem)}
+.a2-stage{position:relative;margin:clamp(.5rem,2vw,2rem) var(--gx) 0}
+.a2-stage .cards{display:block;position:relative;margin:0;padding:0}
+.a2 .card{position:absolute;left:0;top:0;will-change:transform;display:grid;grid-template-columns:auto 1fr auto;grid-template-rows:auto auto auto;
+  width:var(--w,24vw);padding:.45rem .6rem 0;background:#fff;color:#000;overflow:hidden;text-decoration:none;
+  transform:translate3d(var(--x,0),var(--y,0),0);transition:transform .45s cubic-bezier(.22,1,.36,1),opacity .5s}
+.a2 .card::before{content:attr(data-n);grid-area:1/1;font:400 .58rem/1.3 var(--mono)}
+.a2 .card-t{display:contents}
+.a2 .card-t p{grid-area:1/2;justify-self:center;margin:0;font:400 .58rem/1.3 var(--mono);text-transform:uppercase;letter-spacing:.05em;color:#000}
+.a2 .card-t p:empty::before{content:"Art"}
+.a2 .card-t :is(h2,h3){grid-area:2/1/3/4;margin:.2rem 0 0;font:500 calc(var(--w,24vw)*.105)/.9 var(--sans);letter-spacing:-.04em;text-transform:uppercase;color:#000;white-space:nowrap}
+.a2 .cv{grid-area:3/1/4/4;margin:.6rem -.6rem 0;aspect-ratio:4/3;overflow:hidden}
+.a2 .cv :is(img,video){display:block;width:100%;height:100%;object-fit:cover}
+.a2 .card:hover{z-index:300!important;transform:translate3d(var(--x,0),calc(var(--y,0) - clamp(24px,3vw,48px)),0)}
+.a2 .cards:has(.card:hover) .card:not(:hover){opacity:1}   /* sem transparência nas outras: só a capa vem para frente */
+.a2 .card:hover .cv :is(img,video){transform:none}
+
+/* Transição ao abrir um projeto: a página nova sobe e cobre a atual (View Transitions entre páginas).
+   O main.js cancela a transição em qualquer navegação que não seja para um projeto. */
+@view-transition{navigation:auto}
+@keyframes vtUp{from{transform:translateY(100%)}to{transform:translateY(0)}}
+@keyframes vtBack{to{transform:translateY(-8%);filter:brightness(.55)}}
+::view-transition-group(root){animation-duration:.85s}
+::view-transition-new(root){animation:vtUp .85s cubic-bezier(.76,0,.24,1) both}
+::view-transition-old(root){animation:vtBack .85s cubic-bezier(.76,0,.24,1) both}
+@media (prefers-reduced-motion:reduce){::view-transition-new(root),::view-transition-old(root){animation:none}}

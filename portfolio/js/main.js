@@ -240,6 +240,7 @@
   document.querySelectorAll('.bar nav a').forEach(function(a){
     var p=a.pathname;
     if(p!=='/'&&!a.hash&&here.indexOf(p)===0)a.setAttribute('aria-current','page');
+    if(p==='/art-2/'&&here.indexOf('/art/')===0)a.setAttribute('aria-current','page');   // projetos de Art ficam em /art/…
   });
 })();
 
@@ -985,3 +986,82 @@
   addEventListener('scroll',req,{passive:true});
   addEventListener('resize',function(){f.style.scale='';measure();req()});
 })();
+
+/* Art 2: as folhas formam a trilha de uma cascata (como a vitória no Paciência) -------
+   começa no alto à esquerda, desce, quica embaixo, sobe até o alto e desce do outro lado */
+(function(){
+  'use strict';
+  var list=document.querySelector('.cards[data-cat="art2"]');
+  if(!list)return;
+  var stage=list.parentElement,orig=[].slice.call(list.querySelectorAll('.card')),D=document;
+  orig.forEach(function(c,i){c.setAttribute('data-n',i+1)});
+  // repete os projetos para a trilha ficar mais cheia (as cópias não entram na navegação por teclado)
+  var cards=orig.concat(orig.map(function(c){var k=c.cloneNode(true);k.setAttribute('aria-hidden','true');k.tabIndex=-1;list.appendChild(k);return k}));
+  var N=cards.length,mark=stage.querySelector('.a2-mark'),P=[];
+  cards.forEach(function(c,i){c.style.zIndex=10+N-i});   // a anterior fica por cima: cada folha nova sai de baixo dela
+  // trajetória em s∈[0,1]: queda até o chão (sb), quique com pico em sv, termina perto do chão
+  var SB=.4,SV=(1+.92*SB)/1.92;
+  function path(s,F,Pk,y0){
+    if(s<=SB){var u=s/SB;return y0+(F-y0)*Math.pow(u,1.25)}
+    var a=(F-Pk)/Math.pow(SV-SB,2);return Pk+a*Math.pow(s-SV,2);
+  }
+  function layout(){
+    var W=stage.clientWidth,mob=W<760,vh=innerHeight;
+    var cw=Math.round(mob?W*.5:Math.min(W*.24,vh*.376));
+    cards.forEach(function(c){c.style.setProperty('--w',cw+'px')});
+    var ch=cards[0].offsetHeight,Hs=Math.max(mob?vh*.9:vh*.82,ch*2.4);
+    var F=Hs-ch,Pk=Hs*.02,y0=Hs*.05;
+    P=cards.map(function(c,i){
+      var s=N>1?i/(N-1):0;
+      return {x:s*(W-cw),y:path(s,F,Pk,y0),s:s};
+    });
+    cards.forEach(function(c,i){c.style.setProperty('--x',P[i].x.toFixed(0)+'px');c.style.setProperty('--y',P[i].y.toFixed(0)+'px')});
+    stage.style.height=Hs+'px';
+    if(mark){mark.style.left=(SV*(W-cw)+cw/2)+'px';mark.style.top=(F*.78+ch*.5)+'px'}
+    return {W:W,cw:cw,F:F,Pk:Pk,y0:y0};
+  }
+  var G=layout();
+  addEventListener('resize',function(){G=layout()});
+
+  if(matchMedia('(prefers-reduced-motion:reduce)').matches||window.__EDIT__||!Element.prototype.animate)return;
+  // intro: uma folha "corre" pela trajetória e cada projeto fica no seu ponto, por cima do anterior
+  cards.forEach(function(c){c.style.opacity='0'});if(mark)mark.style.opacity='0';
+  var anims=[],done=false;
+  function pt(s){return [s*(G.W-G.cw),path(s,G.F,G.Pk,G.y0)]}
+  function start(){
+    G=layout();
+    // a capa que viaja é a última da lista: ela percorre todo o caminho e termina no último ponto;
+    // as outras aparecem embaixo dela, cada uma quando ela passa pelo seu lugar
+    var head=cards[N-1],T=Math.max(1800,N*100),S0=-.14,steps=90,fr=[];
+    head.style.zIndex=10+N+5;
+    function tAt(s){return (s-S0)/(1-S0)*T}
+    for(var k=0;k<=steps;k++){
+      var s=S0+(1-S0)*k/steps,q=s<0?[s*(G.W-G.cw),G.y0+s*G.F*1.6]:pt(s);
+      fr.push({transform:'translate3d('+q[0].toFixed(1)+'px,'+q[1].toFixed(1)+'px,0)'});
+    }
+    head.style.opacity='';
+    anims.push(head.animate(fr,{duration:T,delay:250,easing:'linear',fill:'backwards'}));
+    cards.slice(0,N-1).forEach(function(c,i){
+      c.style.opacity='';
+      anims.push(c.animate([{opacity:0},{opacity:1}],{duration:1,delay:250+tAt(P[i].s),fill:'backwards'}));
+    });
+    Promise.all(anims.map(function(a){return a.finished})).then(function(){finish(false)},function(){});
+  }
+  function finish(skip){
+    if(done)return;done=true;
+    if(skip)anims.forEach(function(a){try{a.finish()}catch(e){}});
+    if(mark){mark.style.transition='opacity .6s ease';mark.style.opacity=''}
+  }
+  Promise.race([D.fonts&&D.fonts.ready?D.fonts.ready:Promise.resolve(),new Promise(function(r){setTimeout(r,600)})]).then(start);
+  stage.addEventListener('click',function(e){if(!done&&anims.some(function(a){return a.playState==='running'})){e.preventDefault();finish(true)}},true);
+  addEventListener('keydown',function k(){removeEventListener('keydown',k);finish(true)});
+})();
+
+/* Transição só quando o destino é um projeto (/works|art|lab/nome/); o resto navega sem efeito */
+addEventListener('pageswap',function(e){
+  var vt=e.viewTransition;if(!vt)return;
+  var to=null;try{to=new URL(e.activation.entry.url)}catch(err){}
+  var proj=to&&to.origin===location.origin&&/^\/(works|art|lab)\/[^\/]+\/$/.test(to.pathname);
+  var back=e.activation&&e.activation.navigationType==='traverse';
+  if(!proj||back||document.documentElement.classList.contains('ve-on')||matchMedia('(prefers-reduced-motion:reduce)').matches)vt.skipTransition();
+});

@@ -148,7 +148,7 @@ def project_page(*, cat, slug, title, intro, meta, media, alts, domain, header, 
 
 <main id="main" class="proj">
   <section class="proj-head">
-    <p class="crumb"><a href="/{cat}/">{esc(cat_title)}</a></p>
+    <p class="crumb"><a href="/{'art-2' if cat == 'art' else cat}/">{esc(cat_title)}</a></p>
     <h1 class="proj-title">{esc(title)}</h1>
     <div class="proj-info">
       <p class="proj-intro">{esc(intro)}</p>
